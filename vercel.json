@@ -1,40 +1,13 @@
 {
-    "version": 2,
-    "builds": [
+    "rewrites": [
         {
-            "src": "proxy.js",
-            "use": "@vercel/node"
-        },
-        {
-            "src": "index.html",
-            "use": "@vercel/static"
-        },
-        {
-            "src": "index.css",
-            "use": "@vercel/static"
-        },
-        {
-            "src": "app.js",
-            "use": "@vercel/static"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/api/(.*)",
-            "dest": "/proxy.js"
-        },
-        {
-            "src": "/(.*\\.(css|js))",
-            "dest": "/$1"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/index.html"
+            "source": "/api/:path*",
+            "destination": "/api/proxy"
         }
     ],
     "headers": [
         {
-            "source": "/api/(.*)",
+            "source": "/api/:path*",
             "headers": [
                 {
                     "key": "Access-Control-Allow-Origin",
