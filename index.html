@@ -1,230 +1,276 @@
-<div class="container">
-    <div class="header-content">
-        <div class="logo">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="32" height="32" rx="8" fill="url(#logo-gradient)" />
-                <path d="M12 10L20 16L12 22V10Z" fill="white" />
-                <defs>
-                    <linearGradient id="logo-gradient" x1="0" y1="0" x2="32" y2="32">
-                        <stop offset="0%" stop-color="#667eea" />
-                        <stop offset="100%" stop-color="#764ba2" />
-                    </linearGradient>
-                </defs>
-            </svg>
-            <span class="logo-text">PromptLunarX</span>
-        </div>
-        <nav class="nav">
-            <button class="nav-btn active" data-section="videos">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-                </svg>
-                Videos
-            </button>
-            <button class="nav-btn" data-section="images">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                    <polyline points="21 15 16 10 5 21"></polyline>
-                </svg>
-                Images
-            </button>
-        </nav>
-        <div class="header-actions">
-            <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme">
-                <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <circle cx="12" cy="12" r="5"></circle>
-                    <line x1="12" y1="1" x2="12" y2="3"></line>
-                    <line x1="12" y1="21" x2="12" y2="23"></line>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                    <line x1="1" y1="12" x2="3" y2="12"></line>
-                    <line x1="21" y1="12" x2="23" y2="12"></line>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                </svg>
-                <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                </svg>
-            </button>
-        </div>
-    </div>
-</div>
-</header>
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
 
-<!-- Hero Section -->
-<section class="hero">
-    <div class="container">
-        <h1 class="hero-title">Discover Amazing <span class="gradient-text">AI Content</span></h1>
-        <p class="hero-subtitle">Explore the most popular AI-generated videos and images from the creative community
-        </p>
-    </div>
-    <div class="hero-gradient"></div>
-</section>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-<!-- Main Content -->
-<main class="main">
-    <div class="container">
-        <!-- Videos Section -->
-        <section id="videos-section" class="content-section active">
-            <div class="section-header">
-                <h2 class="section-title">Trending Videos</h2>
-                <div class="section-stats">
-                    <span class="stat-badge">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                            <polyline points="17 6 23 6 23 12"></polyline>
-                        </svg>
-                        Most Reactions
-                    </span>
+    <!-- SEO Meta Tags -->
+    <title>PromptLunarX - Discover Amazing AI-Generated Videos & Images</title>
+    <meta name="description"
+        content="Explore the most popular AI-generated videos and images from Civitai's creative community. Browse trending content, premium media, and stunning AI creations.">
+    <meta name="keywords"
+        content="AI art, AI videos, AI images, Civitai, AI-generated content, machine learning art, digital art gallery, PromptLunarX">
+    <meta name="author" content="Harsh Gujarati">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="PromptLunarX - Discover Amazing AI-Generated Content">
+    <meta property="og:description"
+        content="Explore the most popular AI-generated videos and images from Civitai's creative community.">
+    <meta property="og:site_name" content="PromptLunarX">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PromptLunarX - Discover Amazing AI-Generated Content">
+    <meta name="twitter:description"
+        content="Explore the most popular AI-generated videos and images from Civitai's creative community.">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpath d='M12 10L20 16L12 22V10Z' fill='white'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='32' y2='32'%3E%3Cstop offset='0%25' stop-color='%23667eea'/%3E%3Cstop offset='100%25' stop-color='%23764ba2'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="index.css">
+
+    <!-- Preconnect to external domains for performance -->
+    <link rel="preconnect" href="https://civitai.com">
+    <link rel="preconnect" href="https://image.civitai.com">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="32" height="32" rx="8" fill="url(#logo-gradient)" />
+                        <path d="M12 10L20 16L12 22V10Z" fill="white" />
+                        <defs>
+                            <linearGradient id="logo-gradient" x1="0" y1="0" x2="32" y2="32">
+                                <stop offset="0%" stop-color="#667eea" />
+                                <stop offset="100%" stop-color="#764ba2" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <span class="logo-text">PromptLunarX</span>
                 </div>
-            </div>
-            <div class="loading-spinner" id="videos-loading">
-                <div class="spinner"></div>
-                <p>Loading videos...</p>
-            </div>
-            <div class="gallery" id="videos-gallery"></div>
-            <button class="load-more-btn" id="load-more-videos" style="display: none;">
-                Load More Videos
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </button>
-        </section>
-
-        <!-- Images Section -->
-        <section id="images-section" class="content-section">
-            <div class="section-header">
-                <h2 class="section-title">Trending Images</h2>
-                <div class="section-stats">
-                    <span class="stat-badge">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                            <polyline points="17 6 23 6 23 12"></polyline>
-                        </svg>
-                        Most Reactions
-                    </span>
-                </div>
-            </div>
-            <div class="loading-spinner" id="images-loading">
-                <div class="spinner"></div>
-                <p>Loading images...</p>
-            </div>
-            <div class="gallery" id="images-gallery"></div>
-            <button class="load-more-btn" id="load-more-images" style="display: none;">
-                Load More Images
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </button>
-        </section>
-    </div>
-</main>
-
-<!-- Video Modal -->
-<div class="modal" id="video-modal">
-    <div class="modal-backdrop"></div>
-    <div class="modal-content">
-        <button class="modal-close" id="close-video-modal">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-        </button>
-        <div class="modal-body">
-            <video id="modal-video" controls autoplay loop></video>
-            <div class="modal-info">
-                <div class="modal-stats">
-                    <span class="modal-stat">
+                <nav class="nav">
+                    <button class="nav-btn active" data-section="videos">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
-                            <path
-                                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
-                            </path>
+                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
                         </svg>
-                        <span id="modal-reactions">0</span>
-                    </span>
-                    <span class="modal-stat">
+                        Videos
+                    </button>
+                    <button class="nav-btn" data-section="images">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
                         </svg>
-                        <span id="modal-comments">0</span>
-                    </span>
-                    <span class="modal-stat">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                        Images
+                    </button>
+                </nav>
+                <div class="header-actions">
+                    <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme">
+                        <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                         </svg>
-                        <span id="modal-collected">0</span>
-                    </span>
-                </div>
-                <div class="modal-user">
-                    <div class="user-avatar" id="modal-user-avatar"></div>
-                    <span class="user-name" id="modal-user-name">Unknown</span>
+                        <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </header>
 
-<!-- Image Modal -->
-<div class="modal" id="image-modal">
-    <div class="modal-backdrop"></div>
-    <div class="modal-content">
-        <button class="modal-close" id="close-image-modal">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-        </button>
-        <div class="modal-body">
-            <img id="modal-image" alt="Full size image">
-            <div class="modal-info">
-                <div class="modal-stats">
-                    <span class="modal-stat">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path
-                                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
-                            </path>
-                        </svg>
-                        <span id="modal-image-reactions">0</span>
-                    </span>
-                    <span class="modal-stat">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                        </svg>
-                        <span id="modal-image-comments">0</span>
-                    </span>
-                    <span class="modal-stat">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                        </svg>
-                        <span id="modal-image-collected">0</span>
-                    </span>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="hero-title">Discover Amazing <span class="gradient-text">AI Content</span></h1>
+            <p class="hero-subtitle">Explore the most popular AI-generated videos and images from the creative community
+            </p>
+        </div>
+        <div class="hero-gradient"></div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Videos Section -->
+            <section id="videos-section" class="content-section active">
+                <div class="section-header">
+                    <h2 class="section-title">Trending Videos</h2>
+                    <div class="section-stats">
+                        <span class="stat-badge">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                <polyline points="17 6 23 6 23 12"></polyline>
+                            </svg>
+                            Most Reactions
+                        </span>
+                    </div>
                 </div>
-                <div class="modal-user">
-                    <div class="user-avatar" id="modal-image-user-avatar"></div>
-                    <span class="user-name" id="modal-image-user-name">Unknown</span>
+                <div class="loading-spinner" id="videos-loading">
+                    <div class="spinner"></div>
+                    <p>Loading videos...</p>
+                </div>
+                <div class="gallery" id="videos-gallery"></div>
+                <button class="load-more-btn" id="load-more-videos" style="display: none;">
+                    Load More Videos
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+            </section>
+
+            <!-- Images Section -->
+            <section id="images-section" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Trending Images</h2>
+                    <div class="section-stats">
+                        <span class="stat-badge">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                <polyline points="17 6 23 6 23 12"></polyline>
+                            </svg>
+                            Most Reactions
+                        </span>
+                    </div>
+                </div>
+                <div class="loading-spinner" id="images-loading">
+                    <div class="spinner"></div>
+                    <p>Loading images...</p>
+                </div>
+                <div class="gallery" id="images-gallery"></div>
+                <button class="load-more-btn" id="load-more-images" style="display: none;">
+                    Load More Images
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+            </section>
+        </div>
+    </main>
+
+    <!-- Video Modal -->
+    <div class="modal" id="video-modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="close-video-modal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <div class="modal-body">
+                <video id="modal-video" controls autoplay loop></video>
+                <div class="modal-info">
+                    <div class="modal-stats">
+                        <span class="modal-stat">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                </path>
+                            </svg>
+                            <span id="modal-reactions">0</span>
+                        </span>
+                        <span class="modal-stat">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span id="modal-comments">0</span>
+                        </span>
+                        <span class="modal-stat">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span id="modal-collected">0</span>
+                        </span>
+                    </div>
+                    <div class="modal-user">
+                        <div class="user-avatar" id="modal-user-avatar"></div>
+                        <span class="user-name" id="modal-user-name">Unknown</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Security Layer - Load First -->
-<script src="security.js" data-allowed></script>
-<script src="api-security.js" data-allowed></script>
+    <!-- Image Modal -->
+    <div class="modal" id="image-modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="close-image-modal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <div class="modal-body">
+                <img id="modal-image" alt="Full size image">
+                <div class="modal-info">
+                    <div class="modal-stats">
+                        <span class="modal-stat">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                </path>
+                            </svg>
+                            <span id="modal-image-reactions">0</span>
+                        </span>
+                        <span class="modal-stat">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span id="modal-image-comments">0</span>
+                        </span>
+                        <span class="modal-stat">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span id="modal-image-collected">0</span>
+                        </span>
+                    </div>
+                    <div class="modal-user">
+                        <div class="user-avatar" id="modal-image-user-avatar"></div>
+                        <span class="user-name" id="modal-image-user-name">Unknown</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- Main Application -->
-<script src="app.js" data-allowed></script>
+    <!-- Security Layer - Load First -->
+    <script src="security.js" data-allowed></script>
+    <script src="api-security.js" data-allowed></script>
+
+    <!-- Main Application -->
+    <script src="app.js" data-allowed></script>
 </body>
 
 </html>

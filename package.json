@@ -1,7 +1,7 @@
 {
-  "name": "vidhub",
+  "name": "promptlunarx",
   "version": "1.0.0",
-  "description": "A stunning media gallery for browsing Civitai videos and images",
+  "description": "PromptLunarX - A stunning media gallery for browsing Civitai videos and images",
   "main": "proxy.js",
   "scripts": {
     "start": "node proxy.js",

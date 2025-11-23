@@ -1,4 +1,4 @@
-# VidHub - Civitai Media Gallery
+# PromptLunarX - Civitai Media Gallery
 
 A stunning, modern web application for browsing and discovering videos and images from Civitai's extensive media library.
 
