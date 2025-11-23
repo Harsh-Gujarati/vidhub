@@ -30,7 +30,7 @@ const API = {
         base: 'https://civitai.com/api/trpc/image.getInfinite',
         params: {
             json: {
-                period: 'Week',
+                period: 'Month',
                 periodMode: 'published',
                 sort: 'Most Reactions',
                 types: ['video'],
@@ -55,7 +55,7 @@ const API = {
         base: 'https://civitai.com/api/trpc/image.getInfinite',
         params: {
             json: {
-                period: 'Week',
+                period: 'Month',
                 periodMode: 'published',
                 sort: 'Most Reactions',
                 types: ['image'],
