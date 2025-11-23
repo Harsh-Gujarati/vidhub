@@ -29,51 +29,35 @@ const API = {
     videos: {
         base: 'https://civitai.com/api/trpc/image.getInfinite',
         params: {
-            json: {
-                period: 'Month',
-                periodMode: 'published',
-                sort: 'Most Reactions',
-                types: ['video'],
-                withMeta: false,
-                useIndex: true,
-                browsingLevel: 28,
-                include: ['cosmetics'],
-                excludedTagIds: [415792, 426772, 5188, 5249, 130818, 130820, 133182, 5351, 306619, 154326, 161829, 163032],
-                disablePoi: true,
-                disableMinor: true,
-                cursor: null,
-                authed: true
-            },
-            meta: {
-                values: {
-                    cursor: ['undefined']
-                }
-            }
+            period: 'Month',
+            periodMode: 'published',
+            sort: 'Most Reactions',
+            types: ['video'],
+            withMeta: false,
+            useIndex: true,
+            browsingLevel: 28,
+            include: ['cosmetics'],
+            excludedTagIds: [415792, 426772, 5188, 5249, 130818, 130820, 133182, 5351, 306619, 154326, 161829, 163032],
+            disablePoi: true,
+            disableMinor: true,
+            authed: true
         }
     },
     images: {
         base: 'https://civitai.com/api/trpc/image.getInfinite',
         params: {
-            json: {
-                period: 'Month',
-                periodMode: 'published',
-                sort: 'Most Reactions',
-                types: ['image'],
-                withMeta: false,
-                useIndex: true,
-                browsingLevel: 28,
-                include: ['cosmetics'],
-                excludedTagIds: [415792, 426772, 5188, 5249, 130818, 130820, 133182, 5351, 306619, 154326, 161829, 163032],
-                disablePoi: true,
-                disableMinor: true,
-                cursor: null,
-                authed: true
-            },
-            meta: {
-                values: {
-                    cursor: ['undefined']
-                }
-            }
+            period: 'Month',
+            periodMode: 'published',
+            sort: 'Most Reactions',
+            types: ['image'],
+            withMeta: false,
+            useIndex: true,
+            browsingLevel: 28,
+            include: ['cosmetics'],
+            excludedTagIds: [415792, 426772, 5188, 5249, 130818, 130820, 133182, 5351, 306619, 154326, 161829, 163032],
+            disablePoi: true,
+            disableMinor: true,
+            authed: true
         }
     }
 };
@@ -121,16 +105,13 @@ const fetchVideos = async (cursor = null) => {
         // Deep clone the params to avoid modifying the original
         const params = JSON.parse(JSON.stringify(API.videos.params));
 
+        // Add cursor if provided (for pagination)
         if (cursor) {
-            params.json.cursor = cursor;
-            params.meta.values.cursor = [cursor];
-        } else {
-            // For first load, ensure cursor is null
-            params.json.cursor = null;
-            params.meta.values.cursor = ['undefined'];
+            params.cursor = cursor;
         }
 
-        const apiUrl = `${API.videos.base}?input=${encodeURIComponent(JSON.stringify(params))}`;
+        // Wrap params in json object for API
+        const apiUrl = `${API.videos.base}?input=${encodeURIComponent(JSON.stringify({ json: params }))}`;
         const proxyUrl = `${getProxyUrl()}/?url=${encodeURIComponent(apiUrl)}`;
 
         console.log('Fetching videos with cursor:', cursor);
@@ -181,16 +162,13 @@ const fetchImages = async (cursor = null) => {
         // Deep clone the params to avoid modifying the original
         const params = JSON.parse(JSON.stringify(API.images.params));
 
+        // Add cursor if provided (for pagination)
         if (cursor) {
-            params.json.cursor = cursor;
-            params.meta.values.cursor = [cursor];
-        } else {
-            // For first load, ensure cursor is null
-            params.json.cursor = null;
-            params.meta.values.cursor = ['undefined'];
+            params.cursor = cursor;
         }
 
-        const apiUrl = `${API.images.base}?input=${encodeURIComponent(JSON.stringify(params))}`;
+        // Wrap params in json object for API
+        const apiUrl = `${API.images.base}?input=${encodeURIComponent(JSON.stringify({ json: params }))}`;
         const proxyUrl = `${getProxyUrl()}/?url=${encodeURIComponent(apiUrl)}`;
 
         console.log('Fetching images with cursor:', cursor);
