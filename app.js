@@ -118,19 +118,29 @@ const fetchVideos = async (cursor = null) => {
     if (loadMoreBtn) loadMoreBtn.style.display = 'none';
 
     try {
-        const params = { ...API.videos.params };
+        // Deep clone the params to avoid modifying the original
+        const params = JSON.parse(JSON.stringify(API.videos.params));
+
         if (cursor) {
             params.json.cursor = cursor;
             params.meta.values.cursor = [cursor];
+        } else {
+            // For first load, ensure cursor is null
+            params.json.cursor = null;
+            params.meta.values.cursor = ['undefined'];
         }
 
         const apiUrl = `${API.videos.base}?input=${encodeURIComponent(JSON.stringify(params))}`;
         const proxyUrl = `${getProxyUrl()}/?url=${encodeURIComponent(apiUrl)}`;
+
+        console.log('Fetching videos with cursor:', cursor);
         const response = await fetch(proxyUrl);
         const data = await response.json();
 
         if (data.result && data.result.data && data.result.data.json) {
             const { items, nextCursor } = data.result.data.json;
+
+            console.log('Received items:', items.length, 'Next cursor:', nextCursor);
 
             state.videos.items = cursor ? [...state.videos.items, ...items] : items;
             state.videos.cursor = nextCursor;
@@ -168,19 +178,29 @@ const fetchImages = async (cursor = null) => {
     if (loadMoreBtn) loadMoreBtn.style.display = 'none';
 
     try {
-        const params = { ...API.images.params };
+        // Deep clone the params to avoid modifying the original
+        const params = JSON.parse(JSON.stringify(API.images.params));
+
         if (cursor) {
             params.json.cursor = cursor;
             params.meta.values.cursor = [cursor];
+        } else {
+            // For first load, ensure cursor is null
+            params.json.cursor = null;
+            params.meta.values.cursor = ['undefined'];
         }
 
         const apiUrl = `${API.images.base}?input=${encodeURIComponent(JSON.stringify(params))}`;
         const proxyUrl = `${getProxyUrl()}/?url=${encodeURIComponent(apiUrl)}`;
+
+        console.log('Fetching images with cursor:', cursor);
         const response = await fetch(proxyUrl);
         const data = await response.json();
 
         if (data.result && data.result.data && data.result.data.json) {
             const { items, nextCursor } = data.result.data.json;
+
+            console.log('Received items:', items.length, 'Next cursor:', nextCursor);
 
             state.images.items = cursor ? [...state.images.items, ...items] : items;
             state.images.cursor = nextCursor;
