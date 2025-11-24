@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>API Test</title>
+</head>
+
+<body>
+    <h1>Testing Civitai API Pagination</h1>
+    <button id="test">Test API Call</button>
+    <pre id="output"></pre>
+
+    <script>
+        const API = {
+            videos: {
+                base: 'https://civitai.com/api/trpc/image.getInfinite',
+                params: {
+                    json: {
+                        period: 'Month',
+                        periodMode: 'published',
+                        sort: 'Most Reactions',
+                        types: ['video'],
+                        withMeta: false,
+                        useIndex: true,
+                        browsingLevel: 28,
+                        include: ['cosmetics'],
+                        excludedTagIds: [415792, 426772, 5188, 5249, 130818, 130820, 133182, 5351, 306619, 154326, 161829, 163032],
+                        disablePoi: true,
+                        disableMinor: true,
+                        cursor: null,
+                        authed: true
+                    },
+                    meta: {
+                        values: {
+                            cursor: ['undefined']
+                        }
+                    }
+                }
+            }
+        };
+
+        document.getElementById('test').addEventListener('click', async () => {
+            const output = document.getElementById('output');
+
+            // Test 1: First load
+            const params1 = JSON.parse(JSON.stringify(API.videos.params));
+            const url1 = `${API.videos.base}?input=${encodeURIComponent(JSON.stringify(params1))}`;
+            output.textContent = 'First Load URL:\n' + url1 + '\n\n';
+
+            try {
+                const response = await fetch(url1);
+                const data = await response.json();
+                output.textContent += 'Response:\n' + JSON.stringify(data, null, 2) + '\n\n';
+
+                if (data.result?.data?.json?.nextCursor) {
+                    const cursor = data.result.data.json.nextCursor;
+                    output.textContent += 'Next Cursor: ' + cursor + '\n\n';
+
+                    // Test 2: Second load with cursor
+                    const params2 = JSON.parse(JSON.stringify(API.videos.params));
+                    params2.json.cursor = cursor;
+                    params2.meta.values.cursor = [cursor];
+                    const url2 = `${API.videos.base}?input=${encodeURIComponent(JSON.stringify(params2))}`;
+                    output.textContent += 'Second Load URL:\n' + url2;
+                }
+            } catch (error) {
+                output.textContent += 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+
+</html>
