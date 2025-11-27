@@ -38,9 +38,10 @@
     <!-- Preconnect to external domains for performance -->
     <link rel="preconnect" href="https://civitai.com">
     <link rel="preconnect" href="https://image.civitai.com">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
-<body>
+<body data-google-client-id="368457231721-14v2dd0gna8tbhb8qdjivbtg5ta4m793.apps.googleusercontent.com">
     <!-- Header -->
     <header class="header">
         <div class="container">
@@ -76,8 +77,26 @@
                         </svg>
                         Images
                     </button>
+                    <button class="nav-btn" data-section="vip">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polygon points="12 2 15 10 23 10 17 14 19 22 12 17 5 22 7 14 1 10 9 10 12 2"></polygon>
+                        </svg>
+                        VIP
+                    </button>
                 </nav>
                 <div class="header-actions">
+                    <div class="user-auth">
+                        <div id="google-signin-button" class="google-signin"></div>
+                        <div id="user-chip" class="user-chip hidden">
+                            <div class="chip-avatar" id="user-chip-avatar"></div>
+                            <div class="chip-info">
+                                <span id="user-chip-name">Guest</span>
+                                <small id="user-chip-status">Sign in</small>
+                            </div>
+                            <button class="text-btn" type="button" data-logout>Logout</button>
+                        </div>
+                    </div>
                     <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme">
                         <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2">
@@ -176,9 +195,68 @@
                     </svg>
                 </button>
             </section>
+
+            <!-- VIP Section -->
+            <section id="vip-section" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">VIP Lounge</h2>
+                    <div class="section-stats">
+                        <span class="stat-badge">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polygon points="12 2 15 10 23 10 17 14 19 22 12 17 5 22 7 14 1 10 9 10 12 2"></polygon>
+                            </svg>
+                            Premium Drops
+                        </span>
+                    </div>
+                </div>
+                <div class="vip-highlight">
+                    <div>
+                        <p class="vip-eyebrow">Exclusive Access</p>
+                        <h3>Unlock premium AI videos with VIP</h3>
+                        <p>One pass gives you instant access to the latest premium creations and early drops.</p>
+                    </div>
+                    <button class="primary-btn" id="vip-upgrade-btn" type="button">Upgrade to VIP</button>
+                </div>
+                <div class="gallery vip-gallery" id="vip-gallery"></div>
+            </section>
             <div class="ad-container" data-ad-type="display" data-ad-id="footer-display"></div>
         </div>
     </main>
+
+    <!-- User Area -->
+    <section class="user-area" id="user-area">
+        <div class="container">
+            <div class="user-area-header">
+                <h2>User Hub</h2>
+                <span class="vip-pill" id="vip-status-pill">Free Member</span>
+            </div>
+            <div class="user-card" id="user-card">
+                <div class="user-card-info">
+                    <div class="profile-avatar" id="user-panel-avatar"></div>
+                    <div>
+                        <p class="user-name" id="user-panel-name">Sign in to personalize your feed</p>
+                        <small class="user-email" id="user-panel-email"></small>
+                    </div>
+                </div>
+                <div class="user-card-actions">
+                    <button class="primary-btn ghost" id="user-login-cta" type="button">Sign in with Google</button>
+                    <button class="text-btn" type="button" data-logout>Logout</button>
+                </div>
+            </div>
+            <div class="saved-section">
+                <div class="section-header compact">
+                    <h3 class="section-title">Saved Videos</h3>
+                    <p class="section-subtitle" id="saved-count">0 saved</p>
+                </div>
+                <div id="saved-videos-list" class="saved-list">
+                    <div class="empty-state">
+                        <p>Sign in and start saving your favorite drops for later.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Video Modal -->
     <div class="modal" id="video-modal">

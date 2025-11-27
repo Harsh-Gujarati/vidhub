@@ -11,7 +11,11 @@ const state = {
         loading: false
     },
     currentSection: 'videos',
-    theme: localStorage.getItem('theme') || 'dark'
+    theme: localStorage.getItem('theme') || 'dark',
+    user: null,
+    userStore: {},
+    userData: null,
+    premiumVideos: []
 };
 
 let adInjectionSeed = 0;
@@ -28,6 +32,89 @@ const onAdManagerReady = (callback) => {
 
     document.addEventListener('adManagerReady', handler, { once: true });
 };
+
+const STORAGE_KEYS = {
+    user: 'plx_user_profile',
+    userStore: 'plx_user_store'
+};
+
+const defaultUserData = () => ({
+    likes: new Set(),
+    saved: [],
+    vip: false
+});
+
+const getStoredUser = () => {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.user));
+    } catch (error) {
+        console.warn('Failed to parse stored user', error);
+        return null;
+    }
+};
+
+const saveStoredUser = (user) => {
+    if (user) {
+        localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
+    } else {
+        localStorage.removeItem(STORAGE_KEYS.user);
+    }
+};
+
+const loadUserStore = () => {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.userStore)) || {};
+    } catch (error) {
+        console.warn('Failed to parse user store', error);
+        return {};
+    }
+};
+
+const persistUserStore = (store) => {
+    localStorage.setItem(STORAGE_KEYS.userStore, JSON.stringify(store));
+};
+
+const getUserId = (user = state.user) => {
+    if (!user) return null;
+    return user.sub || user.email || null;
+};
+
+const syncUserData = () => {
+    state.userStore = loadUserStore();
+    const userId = getUserId();
+    if (!userId) {
+        state.userData = defaultUserData();
+        return;
+    }
+
+    const profile = state.userStore[userId] || { likes: [], saved: [], vip: false };
+    state.userData = {
+        likes: new Set(profile.likes || []),
+        saved: profile.saved || [],
+        vip: !!profile.vip
+    };
+};
+
+const persistUserData = () => {
+    const userId = getUserId();
+    if (!userId) return;
+
+    state.userStore[userId] = {
+        likes: Array.from(state.userData.likes),
+        saved: state.userData.saved,
+        vip: state.userData.vip
+    };
+
+    persistUserStore(state.userStore);
+};
+
+state.user = getStoredUser();
+syncUserData();
+if (!state.userData) {
+    state.userData = defaultUserData();
+}
+
+const GOOGLE_CLIENT_ID = document.body?.dataset?.googleClientId || '';
 
 // ===== API CONFIGURATION =====
 // Detect proxy URL based on environment
@@ -142,6 +229,7 @@ const fetchVideos = async (cursor = null) => {
             state.videos.cursor = nextCursor;
 
             renderVideos();
+            renderVipVideos();
 
             if (nextCursor && loadMoreBtn) {
                 loadMoreBtn.style.display = 'flex';
@@ -234,16 +322,363 @@ const injectInFeedAds = (galleryEl, positions, prefix) => {
     onAdManagerReady(run);
 };
 
+// ===== AUTH & USER EXPERIENCE =====
+const focusAuthEntry = () => {
+    const target = document.getElementById('google-signin-button');
+    if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+};
+
+const requireAuth = () => {
+    if (state.user) return true;
+    alert('Sign in with Google to use this feature.');
+    focusAuthEntry();
+    return false;
+};
+
+const decodeCredential = (credential) => {
+    const payload = credential.split('.')[1];
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const decoded = atob(normalized);
+    return JSON.parse(decoded);
+};
+
+const handleCredentialResponse = (response) => {
+    if (!response?.credential) return;
+    try {
+        const payload = decodeCredential(response.credential);
+        const user = {
+            name: payload.name || payload.email,
+            email: payload.email,
+            picture: payload.picture,
+            sub: payload.sub
+        };
+
+        state.user = user;
+        saveStoredUser(user);
+        syncUserData();
+        updateUserUI();
+        renderSavedVideos();
+        renderVideos();
+        renderVipVideos();
+    } catch (error) {
+        console.error('Failed to process Google credential', error);
+    }
+};
+
+const logoutUser = () => {
+    state.user = null;
+    saveStoredUser(null);
+    state.userData = defaultUserData();
+    updateUserUI();
+    renderSavedVideos();
+    renderVideos();
+    renderVipVideos();
+};
+
+const setupGoogleAuth = () => {
+    updateUserUI();
+    renderSavedVideos();
+
+    if (!GOOGLE_CLIENT_ID) {
+        console.warn('Missing Google Client ID. Update data-google-client-id on <body>.');
+        return;
+    }
+
+    const renderButton = () => {
+        if (!(window.google && window.google.accounts?.id)) {
+            return false;
+        }
+
+        window.google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleCredentialResponse
+        });
+
+        const buttonParent = document.getElementById('google-signin-button');
+        if (buttonParent) {
+            buttonParent.innerHTML = '';
+            window.google.accounts.id.renderButton(buttonParent, {
+                theme: 'outline',
+                size: 'medium',
+                type: 'standard',
+            });
+        }
+
+        return true;
+    };
+
+    if (!renderButton()) {
+        const interval = setInterval(() => {
+            if (renderButton()) {
+                clearInterval(interval);
+            }
+        }, 400);
+    }
+};
+
+const getItemId = (item) => item.id || item.hash || item.uuid || item.url || String(item.createdAt || Math.random());
+
+const getItemTitle = (item) => item.title || item.name || item.meta?.name || `Video by ${item.user?.username || 'Unknown'}`;
+
+const toggleLike = (item) => {
+    if (!requireAuth()) return;
+    const itemId = getItemId(item);
+
+    if (state.userData.likes.has(itemId)) {
+        state.userData.likes.delete(itemId);
+    } else {
+        state.userData.likes.add(itemId);
+    }
+
+    persistUserData();
+    renderVideos();
+    renderVipVideos();
+};
+
+const toggleSave = (item) => {
+    if (!requireAuth()) return;
+    const itemId = getItemId(item);
+    const existingIndex = state.userData.saved.findIndex(saved => saved.id === itemId);
+
+    if (existingIndex >= 0) {
+        state.userData.saved.splice(existingIndex, 1);
+    } else {
+        state.userData.saved.unshift({
+            id: itemId,
+            timestamp: Date.now(),
+            item
+        });
+
+        if (state.userData.saved.length > 30) {
+            state.userData.saved = state.userData.saved.slice(0, 30);
+        }
+    }
+
+    persistUserData();
+    renderVideos();
+    renderVipVideos();
+    renderSavedVideos();
+};
+
+const updateUserUI = () => {
+    const googleBtn = document.getElementById('google-signin-button');
+    const userChip = document.getElementById('user-chip');
+    const chipName = document.getElementById('user-chip-name');
+    const chipStatus = document.getElementById('user-chip-status');
+    const chipAvatar = document.getElementById('user-chip-avatar');
+    const panelName = document.getElementById('user-panel-name');
+    const panelEmail = document.getElementById('user-panel-email');
+    const panelAvatar = document.getElementById('user-panel-avatar');
+    const vipStatusPill = document.getElementById('vip-status-pill');
+    const loginCta = document.getElementById('user-login-cta');
+
+    if (!state.user) {
+        if (googleBtn) googleBtn.style.display = 'inline-block';
+        if (userChip) userChip.classList.add('hidden');
+        if (chipName) chipName.textContent = 'Guest';
+        if (chipStatus) chipStatus.textContent = 'Sign in';
+        if (chipAvatar) chipAvatar.textContent = '👤';
+        if (panelName) panelName.textContent = 'Sign in to personalize your feed';
+        if (panelEmail) panelEmail.textContent = '';
+        if (panelAvatar) panelAvatar.textContent = '👤';
+        if (loginCta) loginCta.style.display = 'inline-flex';
+    } else {
+        if (googleBtn) googleBtn.style.display = 'none';
+        if (userChip) userChip.classList.remove('hidden');
+        if (chipName) chipName.textContent = state.user.name || state.user.email;
+        if (chipStatus) chipStatus.textContent = state.userData.vip ? 'VIP' : 'Free';
+        if (chipAvatar) {
+            chipAvatar.innerHTML = state.user.picture
+                ? `<img src="${state.user.picture}" alt="${state.user.name || 'User avatar'}">`
+                : (state.user.name || '?').charAt(0).toUpperCase();
+        }
+        if (panelName) panelName.textContent = state.user.name || 'Welcome back';
+        if (panelEmail) panelEmail.textContent = state.user.email || '';
+        if (panelAvatar) {
+            panelAvatar.innerHTML = state.user.picture
+                ? `<img src="${state.user.picture}" alt="${state.user.name || 'User avatar'}">`
+                : (state.user.name || '?').charAt(0).toUpperCase();
+        }
+        if (loginCta) loginCta.style.display = 'none';
+    }
+
+    if (vipStatusPill) {
+        const isVipActive = !!state.user && state.userData.vip;
+        vipStatusPill.textContent = isVipActive ? 'VIP Active' : 'Free Member';
+        vipStatusPill.classList.toggle('active', isVipActive);
+    }
+};
+
+const renderSavedVideos = () => {
+    const list = document.getElementById('saved-videos-list');
+    const countLabel = document.getElementById('saved-count');
+    if (!list) return;
+
+    if (!state.user) {
+        list.innerHTML = `
+            <div class="empty-state">
+                <p>Sign in to start saving your favorite videos.</p>
+            </div>
+        `;
+        if (countLabel) countLabel.textContent = '0 saved';
+        return;
+    }
+
+    const savedItems = state.userData.saved || [];
+    if (countLabel) {
+        countLabel.textContent = `${savedItems.length} saved`;
+    }
+
+    if (!savedItems.length) {
+        list.innerHTML = `
+            <div class="empty-state">
+                <p>Your saved list is empty. Tap the save icon on any video to add it here.</p>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = savedItems.map((entry, index) => {
+        const item = entry.item;
+        const previewUrl = getVideoUrl(item.url);
+        const username = item.user?.username || 'Unknown';
+        return `
+            <div class="saved-item" data-index="${index}">
+                <div class="saved-media">
+                    <video src="${previewUrl}" muted loop playsinline></video>
+                </div>
+                <div class="saved-info">
+                    <strong>${getItemTitle(item)}</strong>
+                    <p class="meta">by ${username}</p>
+                    <button class="primary-btn ghost saved-play-btn" data-index="${index}" type="button">Play</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    list.querySelectorAll('.saved-item').forEach((card) => {
+        card.addEventListener('click', (event) => {
+            const index = parseInt(card.dataset.index, 10);
+            event.stopPropagation();
+            const saved = state.userData.saved[index];
+            if (saved) {
+                openVideoModal(saved.item);
+            }
+        });
+    });
+
+    list.querySelectorAll('.saved-play-btn').forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const index = parseInt(btn.dataset.index, 10);
+            const saved = state.userData.saved[index];
+            if (saved) {
+                openVideoModal(saved.item);
+            }
+        });
+    });
+};
+
+const handleVipVideoClick = (item) => {
+    if (!state.user || !state.userData.vip) {
+        alert('Upgrade to VIP to watch premium videos.');
+        return;
+    }
+    openVideoModal(item);
+};
+
+const renderVipVideos = () => {
+    const gallery = document.getElementById('vip-gallery');
+    if (!gallery) return;
+
+    const premiumVideos = state.videos.items.filter(isPremiumContent);
+    state.premiumVideos = premiumVideos;
+
+    if (!premiumVideos.length) {
+        gallery.innerHTML = `
+            <div class="empty-state">
+                <p>Premium drops will appear here soon. Stay tuned!</p>
+            </div>
+        `;
+        return;
+    }
+
+    const hasVip = !!state.user && state.userData.vip;
+    gallery.innerHTML = premiumVideos.map((item, index) => {
+        const videoUrl = getVideoUrl(item.url);
+        const username = item.user?.username || 'Unknown';
+        const initial = username ? username.charAt(0).toUpperCase() : '?';
+        return `
+            <div class="gallery-item" data-index="${index}">
+                <div class="gallery-item-media">
+                    <video src="${videoUrl}" muted loop playsinline></video>
+                </div>
+                <div class="gallery-item-info">
+                    <div class="gallery-item-user">
+                        <div class="user-avatar">
+                            ${initial}
+                        </div>
+                        <span class="user-name">${username}</span>
+                    </div>
+                    <div class="gallery-item-actions">
+                        <button class="primary-btn vip-watch-btn" data-index="${index}" type="button">
+                            ${hasVip ? 'Watch Now' : 'Unlock VIP'}
+                        </button>
+                    </div>
+                </div>
+                <div class="vip-overlay ${hasVip ? 'vip-open' : ''}">
+                    <span class="vip-pill ${hasVip ? 'active' : ''}">${hasVip ? 'VIP' : 'VIP Locked'}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    gallery.querySelectorAll('.vip-watch-btn').forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const index = parseInt(btn.dataset.index, 10);
+            const item = premiumVideos[index];
+            if (!item) return;
+            if (!state.user || !state.userData.vip) {
+                handleVipUpgrade();
+            } else {
+                openVideoModal(item);
+            }
+        });
+    });
+};
+
+const handleVipUpgrade = () => {
+    if (!requireAuth()) return;
+    if (state.userData.vip) {
+        alert('You already have VIP access.');
+        return;
+    }
+    state.userData.vip = true;
+    persistUserData();
+    updateUserUI();
+    renderVipVideos();
+    alert('VIP unlocked! Enjoy premium videos.');
+};
+
 // ===== RENDER FUNCTIONS =====
 const renderVideos = () => {
     const galleryEl = document.getElementById('videos-gallery');
     if (!galleryEl) return;
+    const likeSet = state.userData?.likes || new Set();
+    const savedList = state.userData?.saved || [];
 
     galleryEl.innerHTML = state.videos.items.map((item, index) => {
         const videoUrl = getVideoUrl(item.url);
         const username = item.user?.username || 'Unknown';
         const userImage = item.user?.image;
         const isPremium = isPremiumContent(item);
+        const itemId = getItemId(item);
+        const isLiked = likeSet.has(itemId);
+        const isSaved = savedList.some(saved => saved.id === itemId);
+        const likeDisplay = item.reactionCount + (isLiked ? 1 : 0);
 
         return `
             <div class="gallery-item" data-index="${index}" style="animation-delay: ${(index % 12) * 0.05}s">
@@ -272,7 +707,7 @@ const renderVideos = () => {
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                             </svg>
-                            ${formatNumber(item.reactionCount)}
+                            ${formatNumber(likeDisplay)}
                         </span>
                         <span class="stat">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -293,6 +728,20 @@ const renderVideos = () => {
                         </div>
                         <span class="user-name">${username}</span>
                     </div>
+                    <div class="gallery-item-actions">
+                        <button class="action-btn like-btn ${isLiked ? 'active' : ''}" data-index="${index}" type="button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                            ${formatNumber(likeDisplay)}
+                        </button>
+                        <button class="action-btn save-btn ${isSaved ? 'active' : ''}" data-index="${index}" type="button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            ${isSaved ? 'Saved' : 'Save'}
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -303,6 +752,24 @@ const renderVideos = () => {
         el.addEventListener('click', () => {
             const index = parseInt(el.dataset.index);
             openVideoModal(state.videos.items[index]);
+        });
+    });
+
+    galleryEl.querySelectorAll('.like-btn').forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const index = parseInt(btn.dataset.index, 10);
+            const item = state.videos.items[index];
+            if (item) toggleLike(item);
+        });
+    });
+
+    galleryEl.querySelectorAll('.save-btn').forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const index = parseInt(btn.dataset.index, 10);
+            const item = state.videos.items[index];
+            if (item) toggleSave(item);
         });
     });
 
@@ -496,6 +963,7 @@ const switchSection = (section) => {
 const init = () => {
     // Set initial theme
     setTheme(state.theme);
+    setupGoogleAuth();
 
     // Theme toggle
     const themeToggle = document.getElementById('theme-toggle');
@@ -545,6 +1013,21 @@ const init = () => {
     const imageModal = document.getElementById('image-modal');
     if (imageModal) {
         imageModal.querySelector('.modal-backdrop')?.addEventListener('click', closeImageModal);
+    }
+
+    // Auth actions
+    document.querySelectorAll('[data-logout]').forEach(btn => {
+        btn.addEventListener('click', logoutUser);
+    });
+
+    const vipUpgradeBtn = document.getElementById('vip-upgrade-btn');
+    if (vipUpgradeBtn) {
+        vipUpgradeBtn.addEventListener('click', handleVipUpgrade);
+    }
+
+    const loginCTA = document.getElementById('user-login-cta');
+    if (loginCTA) {
+        loginCTA.addEventListener('click', focusAuthEntry);
     }
 
     // Keyboard shortcuts
