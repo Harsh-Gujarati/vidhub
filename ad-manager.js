@@ -1,3 +1,36 @@
+// Initialize Ad Manager
+let adManager = null;
+
+const instantiateAdManager = () => {
+    if (adManager) return;
+    adManager = new AdManager();
+    window.adManager = adManager;
+    document.dispatchEvent(new CustomEvent('adManagerReady', { detail: adManager }));
+};
+
+// Load AdSense script first
+const loadAdSenseScript = () => {
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9258235332675012';
+    script.crossOrigin = 'anonymous';
+    script.onerror = () => {
+        console.log('AdSense script failed to load');
+        instantiateAdManager();
+    };
+    script.onload = () => {
+        console.log('AdSense script loaded');
+        instantiateAdManager();
+    };
+    document.head.appendChild(script);
+};
+
+// Start loading ads when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadAdSenseScript);
+} else {
+    loadAdSenseScript();
+}
 // ===== AD MANAGER =====
 // Manages AdSense (primary) and Adsterra (fallback) ads with smart detection
 
@@ -7,6 +40,7 @@ class AdManager {
         this.adSenseTimeout = 3000; // 3 seconds timeout for AdSense
         this.adContainers = new Map();
         this.isMobile = window.innerWidth <= 768;
+        this.socialBarLoaded = false;
 
         // Track which ads have been initialized
         this.initializedAds = new Set();
@@ -16,8 +50,9 @@ class AdManager {
     }
 
     init() {
-        // Load popunder immediately (works for both desktop and mobile)
+        // Load popunder & social bar immediately (works for both desktop and mobile)
         this.loadPopunder();
+        this.loadSocialBar();
 
         // Check if AdSense is available
         this.checkAdSense().then(isAvailable => {
@@ -74,6 +109,20 @@ class AdManager {
         console.log('Popunder ad loaded');
     }
 
+    // Load Adsterra social bar (desktop & mobile)
+    loadSocialBar() {
+        if (this.socialBarLoaded) return;
+
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.async = true;
+        script.src = '//warhealthy.com/6e/25/4b/6e254b551a00fbe395397862809d8b31.js';
+        document.body.appendChild(script);
+
+        this.socialBarLoaded = true;
+        console.log('Social bar loaded');
+    }
+
     // Load header ad (desktop: 728x90, mobile: 320x50)
     loadHeaderAd() {
         const container = document.getElementById('header-ad-container');
@@ -85,9 +134,9 @@ class AdManager {
         } else {
             // Use Adsterra
             if (this.isMobile) {
-                this.loadAdsterraMobileBanner(container);
+                this.loadAdsterraMobileBanner(container, 'header');
             } else {
-                this.loadAdsterraDesktopBanner(container);
+                this.loadAdsterraDesktopBanner(container, 'header');
             }
         }
     }
@@ -238,11 +287,11 @@ class AdManager {
         container.innerHTML = '';
 
         // Load appropriate Adsterra ad based on position
-        if (adId.includes('header')) {
+        if (adId && adId.includes('header')) {
             if (this.isMobile) {
-                this.loadAdsterraMobileBanner(container);
+                this.loadAdsterraMobileBanner(container, adId);
             } else {
-                this.loadAdsterraDesktopBanner(container);
+                this.loadAdsterraDesktopBanner(container, adId);
             }
         } else {
             // Use native banner for in-content
@@ -251,8 +300,9 @@ class AdManager {
     }
 
     // Load Adsterra Desktop Banner (728x90)
-    loadAdsterraDesktopBanner(container) {
-        if (this.initializedAds.has('adsterra-desktop-banner')) return;
+    loadAdsterraDesktopBanner(container, adId = 'desktop-banner') {
+        const uniqueId = `adsterra-desktop-banner-${adId}`;
+        if (this.initializedAds.has(uniqueId)) return;
 
         const adHtml = `
             <div class="adsterra-banner">
@@ -271,15 +321,16 @@ class AdManager {
 
         container.innerHTML = adHtml;
         container.classList.add('ad-loaded', 'adsterra-ad');
-        this.initializedAds.add('adsterra-desktop-banner');
+        this.initializedAds.add(uniqueId);
 
         // Execute scripts
         this.executeScripts(container);
     }
 
     // Load Adsterra Mobile Banner (320x50)
-    loadAdsterraMobileBanner(container) {
-        if (this.initializedAds.has('adsterra-mobile-banner')) return;
+    loadAdsterraMobileBanner(container, adId = 'mobile-banner') {
+        const uniqueId = `adsterra-mobile-banner-${adId}`;
+        if (this.initializedAds.has(uniqueId)) return;
 
         const adHtml = `
             <div class="adsterra-banner">
@@ -298,7 +349,7 @@ class AdManager {
 
         container.innerHTML = adHtml;
         container.classList.add('ad-loaded', 'adsterra-ad');
-        this.initializedAds.add('adsterra-mobile-banner');
+        this.initializedAds.add(uniqueId);
 
         // Execute scripts
         this.executeScripts(container);
@@ -358,13 +409,19 @@ class AdManager {
                 rootMargin: '200px' // Load ads 200px before they come into view
             });
 
-            // Observe all ad containers
+            // Observe all ad containers with datasets
             document.querySelectorAll('.ad-container').forEach(container => {
+                if (!container.dataset.adType || !container.dataset.adId) {
+                    return;
+                }
                 observer.observe(container);
             });
         } else {
             // Fallback: load all ads immediately
             document.querySelectorAll('.ad-container').forEach(container => {
+                if (!container.dataset.adType || !container.dataset.adId) {
+                    return;
+                }
                 const adType = container.dataset.adType;
                 const adId = container.dataset.adId;
                 this.loadAdByType(container, adType, adId);
@@ -398,11 +455,16 @@ class AdManager {
     }
 
     // Public method to add in-content ad after gallery items
-    addInContentAd(galleryContainer, position) {
+    addInContentAd(galleryContainer, position, options = {}) {
+        const {
+            adType = 'in-feed',
+            adId = `content-${position}`
+        } = options;
+
         const adContainer = document.createElement('div');
         adContainer.className = 'ad-container in-content-ad';
-        adContainer.dataset.adType = 'in-feed';
-        adContainer.dataset.adId = `content-${position}`;
+        adContainer.dataset.adType = adType;
+        adContainer.dataset.adId = adId;
 
         const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
         if (galleryItems.length > position) {
@@ -414,34 +476,3 @@ class AdManager {
     }
 }
 
-// Initialize Ad Manager
-let adManager;
-
-// Load AdSense script first
-const loadAdSenseScript = () => {
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9258235332675012';
-    script.crossOrigin = 'anonymous';
-    script.onerror = () => {
-        console.log('AdSense script failed to load');
-        // Initialize ad manager anyway with fallback
-        adManager = new AdManager();
-    };
-    script.onload = () => {
-        console.log('AdSense script loaded');
-        // Initialize ad manager
-        adManager = new AdManager();
-    };
-    document.head.appendChild(script);
-};
-
-// Start loading ads when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadAdSenseScript);
-} else {
-    loadAdSenseScript();
-}
-
-// Export for use in app.js
-window.adManager = adManager;

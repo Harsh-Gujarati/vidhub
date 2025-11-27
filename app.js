@@ -14,6 +14,21 @@ const state = {
     theme: localStorage.getItem('theme') || 'dark'
 };
 
+let adInjectionSeed = 0;
+
+const onAdManagerReady = (callback) => {
+    if (window.adManager) {
+        callback(window.adManager);
+        return;
+    }
+
+    const handler = (event) => {
+        callback(event.detail || window.adManager);
+    };
+
+    document.addEventListener('adManagerReady', handler, { once: true });
+};
+
 // ===== API CONFIGURATION =====
 // Detect proxy URL based on environment
 const getProxyUrl = () => {
@@ -204,6 +219,21 @@ const fetchImages = async (cursor = null) => {
     }
 };
 
+const injectInFeedAds = (galleryEl, positions, prefix) => {
+    if (!galleryEl || !positions?.length) return;
+
+    const run = (manager) => {
+        positions.forEach(position => {
+            manager.addInContentAd(galleryEl, position, {
+                adType: 'in-feed',
+                adId: `${prefix}-infeed-${position}-${++adInjectionSeed}`
+            });
+        });
+    };
+
+    onAdManagerReady(run);
+};
+
 // ===== RENDER FUNCTIONS =====
 const renderVideos = () => {
     const galleryEl = document.getElementById('videos-gallery');
@@ -275,6 +305,8 @@ const renderVideos = () => {
             openVideoModal(state.videos.items[index]);
         });
     });
+
+    injectInFeedAds(galleryEl, [3, 9], 'videos');
 };
 
 const renderImages = () => {
@@ -336,6 +368,8 @@ const renderImages = () => {
             openImageModal(state.images.items[index]);
         });
     });
+
+    injectInFeedAds(galleryEl, [4], 'images');
 };
 
 // ===== MODAL FUNCTIONS =====

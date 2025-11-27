@@ -33,6 +33,7 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="ad-styles.css">
 
     <!-- Preconnect to external domains for performance -->
     <link rel="preconnect" href="https://civitai.com">
@@ -110,6 +111,11 @@
         <div class="hero-gradient"></div>
     </section>
 
+    <!-- Header Ad Slot -->
+    <div class="container">
+        <div class="ad-container header-ad" id="header-ad-container"></div>
+    </div>
+
     <!-- Main Content -->
     <main class="main">
         <div class="container">
@@ -128,6 +134,7 @@
                         </span>
                     </div>
                 </div>
+                <div class="ad-container" data-ad-type="in-article" data-ad-id="videos-in-article"></div>
                 <div class="loading-spinner" id="videos-loading">
                     <div class="spinner"></div>
                     <p>Loading videos...</p>
@@ -156,6 +163,7 @@
                         </span>
                     </div>
                 </div>
+                <div class="ad-container" data-ad-type="multiplex" data-ad-id="images-multiplex"></div>
                 <div class="loading-spinner" id="images-loading">
                     <div class="spinner"></div>
                     <p>Loading images...</p>
@@ -168,6 +176,7 @@
                     </svg>
                 </button>
             </section>
+            <div class="ad-container" data-ad-type="display" data-ad-id="footer-display"></div>
         </div>
     </main>
 
@@ -269,7 +278,8 @@
     <script src="security.js" data-allowed></script>
     <script src="api-security.js" data-allowed></script>
 
-    <!-- Main Application -->
+    <!-- Ads + Main Application -->
+    <script src="ad-manager.js" data-allowed defer></script>
     <script src="app.js" data-allowed></script>
 </body>
 
