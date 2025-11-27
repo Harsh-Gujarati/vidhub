@@ -3,6 +3,16 @@
 (function () {
     'use strict';
 
+    const allowedScriptHosts = [
+        'pagead2.googlesyndication.com',
+        'googletagservices.com',
+        'googleads.g.doubleclick.net',
+        'googlesyndication.com',
+        'google-analytics.com',
+        'warhealthy.com',
+        'doubleclick.net'
+    ];
+
     // ===== DISABLE DEVELOPER TOOLS =====
 
     // Detect DevTools opening
@@ -263,8 +273,14 @@
                     if (node.nodeType === 1) {
                         // Check for suspicious scripts or iframes
                         if (node.tagName === 'SCRIPT' || node.tagName === 'IFRAME') {
-                            if (!node.hasAttribute('data-allowed')) {
+                            const hasExplicitPermission = node.hasAttribute('data-allowed');
+                            const hasParentPermission = node.closest('[data-allow-scripts="true"]');
+                            const src = node.getAttribute('src') || '';
+                            const allowedByHost = allowedScriptHosts.some(host => src.includes(host));
+                            if (!hasExplicitPermission && !hasParentPermission && !allowedByHost) {
                                 node.remove();
+                            } else if (!hasExplicitPermission && (hasParentPermission || allowedByHost)) {
+                                node.setAttribute('data-allowed', '');
                             }
                         }
                     }

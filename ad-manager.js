@@ -14,6 +14,7 @@ const loadAdSenseScript = () => {
     script.async = true;
     script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9258235332675012';
     script.crossOrigin = 'anonymous';
+    script.setAttribute('data-allowed', '');
     script.onerror = () => {
         console.log('AdSense script failed to load');
         instantiateAdManager();
@@ -68,6 +69,11 @@ class AdManager {
         this.setupLazyLoading();
     }
 
+    markContainerSafe(container) {
+        if (!container) return;
+        container.setAttribute('data-allow-scripts', 'true');
+    }
+
     // Check if AdSense is loaded and working
     async checkAdSense() {
         return new Promise((resolve) => {
@@ -102,7 +108,8 @@ class AdManager {
 
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.src = '//warhealthy.com/87/11/5a/87115acd9552baa3c90beda2f274dc8e.js';
+        script.src = 'https://warhealthy.com/87/11/5a/87115acd9552baa3c90beda2f274dc8e.js';
+        script.setAttribute('data-allowed', '');
         document.body.appendChild(script);
 
         this.initializedAds.add('popunder');
@@ -116,7 +123,8 @@ class AdManager {
         const script = document.createElement('script');
         script.type = 'text/javascript';
         script.async = true;
-        script.src = '//warhealthy.com/6e/25/4b/6e254b551a00fbe395397862809d8b31.js';
+        script.src = 'https://warhealthy.com/6e/25/4b/6e254b551a00fbe395397862809d8b31.js';
+        script.setAttribute('data-allowed', '');
         document.body.appendChild(script);
 
         this.socialBarLoaded = true;
@@ -127,6 +135,7 @@ class AdManager {
     loadHeaderAd() {
         const container = document.getElementById('header-ad-container');
         if (!container) return;
+        this.markContainerSafe(container);
 
         if (this.adSenseLoaded) {
             // Try AdSense first
@@ -162,6 +171,7 @@ class AdManager {
 
         container.innerHTML = adHtml;
         container.classList.add('ad-loaded');
+        this.markContainerSafe(container);
 
         try {
             (window.adsbygoogle = window.adsbygoogle || []).push({});
@@ -192,6 +202,7 @@ class AdManager {
 
         container.innerHTML = adHtml;
         container.classList.add('ad-loaded');
+        this.markContainerSafe(container);
 
         try {
             (window.adsbygoogle = window.adsbygoogle || []).push({});
@@ -221,6 +232,7 @@ class AdManager {
 
         container.innerHTML = adHtml;
         container.classList.add('ad-loaded');
+        this.markContainerSafe(container);
 
         try {
             (window.adsbygoogle = window.adsbygoogle || []).push({});
@@ -249,6 +261,7 @@ class AdManager {
 
         container.innerHTML = adHtml;
         container.classList.add('ad-loaded');
+        this.markContainerSafe(container);
 
         try {
             (window.adsbygoogle = window.adsbygoogle || []).push({});
@@ -285,6 +298,7 @@ class AdManager {
     loadFallbackAd(container, adId) {
         // Clear AdSense ad
         container.innerHTML = '';
+        this.markContainerSafe(container);
 
         // Load appropriate Adsterra ad based on position
         if (adId && adId.includes('header')) {
@@ -315,7 +329,7 @@ class AdManager {
                         'params' : {}
                     };
                 </script>
-                <script type="text/javascript" src="//warhealthy.com/5c864e04a217fd55138f61168bcb91a9/invoke.js"></script>
+                <script type="text/javascript" src="https://warhealthy.com/5c864e04a217fd55138f61168bcb91a9/invoke.js"></script>
             </div>
         `;
 
@@ -343,7 +357,7 @@ class AdManager {
                         'params' : {}
                     };
                 </script>
-                <script type="text/javascript" src="//warhealthy.com/5dc248752b1180e6817864a61efebc1a/invoke.js"></script>
+                <script type="text/javascript" src="https://warhealthy.com/5dc248752b1180e6817864a61efebc1a/invoke.js"></script>
             </div>
         `;
 
@@ -362,7 +376,7 @@ class AdManager {
 
         const adHtml = `
             <div class="adsterra-native">
-                <script async="async" data-cfasync="false" src="//warhealthy.com/43c72195bc0c32d143a2ea7687d2c6f9/invoke.js"></script>
+                <script async="async" data-cfasync="false" src="https://warhealthy.com/43c72195bc0c32d143a2ea7687d2c6f9/invoke.js"></script>
                 <div id="container-43c72195bc0c32d143a2ea7687d2c6f9"></div>
             </div>
         `;
@@ -384,6 +398,7 @@ class AdManager {
                 newScript.setAttribute(attr.name, attr.value);
             });
             newScript.textContent = oldScript.textContent;
+            newScript.setAttribute('data-allowed', '');
             oldScript.parentNode.replaceChild(newScript, oldScript);
         });
     }
@@ -465,6 +480,7 @@ class AdManager {
         adContainer.className = 'ad-container in-content-ad';
         adContainer.dataset.adType = adType;
         adContainer.dataset.adId = adId;
+        adContainer.setAttribute('data-allow-scripts', 'true');
 
         const galleryItems = galleryContainer.querySelectorAll('.gallery-item');
         if (galleryItems.length > position) {
