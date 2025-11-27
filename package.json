@@ -5,7 +5,8 @@
   "main": "proxy.js",
   "scripts": {
     "start": "node proxy.js",
-    "dev": "node proxy.js"
+    "dev": "node proxy.js",
+    "build:analytics": "esbuild analytics-entry.js --bundle --format=esm --platform=browser --outfile=analytics.bundle.js"
   },
   "keywords": [
     "civitai",
@@ -17,9 +18,13 @@
   "author": "Harsh Gujarati",
   "license": "MIT",
   "dependencies": {
+    "@vercel/analytics": "^1.5.0",
+    "cors": "^2.8.5",
     "express": "^4.18.2",
-    "node-fetch": "^2.7.0",
-    "cors": "^2.8.5"
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.0"
   },
   "engines": {
     "node": ">=14.x"
