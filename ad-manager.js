@@ -67,7 +67,6 @@ class AdManager {
 
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.async = true;
         script.src = 'https://warhealthy.com/6e/25/4b/6e254b551a00fbe395397862809d8b31.js';
         script.setAttribute('data-allowed', '');
         document.body.appendChild(script);
@@ -94,6 +93,7 @@ class AdManager {
         const uniqueId = `adsterra-desktop-banner-${adId}`;
         if (this.initializedAds.has(uniqueId)) return;
 
+        // Using your exact code structure
         const adHtml = `
             <div class="adsterra-banner">
                 <script type="text/javascript">
@@ -122,6 +122,7 @@ class AdManager {
         const uniqueId = `adsterra-mobile-banner-${adId}`;
         if (this.initializedAds.has(uniqueId)) return;
 
+        // Using your exact code structure
         const adHtml = `
             <div class="adsterra-banner">
                 <script type="text/javascript">
@@ -150,6 +151,7 @@ class AdManager {
         const uniqueId = `adsterra-native-${adId}`;
         if (this.initializedAds.has(uniqueId)) return;
 
+        // Using your exact code structure
         const adHtml = `
             <div class="adsterra-native">
                 <script async="async" data-cfasync="false" src="https://warhealthy.com/43c72195bc0c32d143a2ea7687d2c6f9/invoke.js"></script>
@@ -174,7 +176,7 @@ class AdManager {
                 newScript.setAttribute(attr.name, attr.value);
             });
             newScript.textContent = oldScript.textContent;
-            newScript.setAttribute('data-allowed', '');
+            newScript.setAttribute('data-allowed', ''); // Important for security.js
             oldScript.parentNode.replaceChild(newScript, oldScript);
         });
     }
