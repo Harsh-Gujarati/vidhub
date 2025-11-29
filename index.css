@@ -1153,15 +1153,6 @@ h6 {
     background: var(--bg-tertiary);
 }
 
-width: 100%;
-max-height: 90vh;
-background: var(--card-bg);
-border-radius: var(--radius-2xl);
-box-shadow: var(--shadow-xl);
-overflow: hidden;
-animation: scaleIn 0.3s ease-out;
-}
-
 .modal-close {
     position: absolute;
     top: var(--spacing-md);
