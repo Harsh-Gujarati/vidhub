@@ -8,37 +8,17 @@ const instantiateAdManager = () => {
     document.dispatchEvent(new CustomEvent('adManagerReady', { detail: adManager }));
 };
 
-// Load AdSense script first
-const loadAdSenseScript = () => {
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9258235332675012';
-    script.crossOrigin = 'anonymous';
-    script.setAttribute('data-allowed', '');
-    script.onerror = () => {
-        console.log('AdSense script failed to load');
-        instantiateAdManager();
-    };
-    script.onload = () => {
-        console.log('AdSense script loaded');
-        instantiateAdManager();
-    };
-    document.head.appendChild(script);
-};
-
 // Start loading ads when DOM is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadAdSenseScript);
+    document.addEventListener('DOMContentLoaded', instantiateAdManager);
 } else {
-    loadAdSenseScript();
+    instantiateAdManager();
 }
-// ===== AD MANAGER =====
-// Manages AdSense (primary) and Adsterra (fallback) ads with smart detection
 
+// ===== AD MANAGER =====
+// Manages Adsterra ads
 class AdManager {
     constructor() {
-        this.adSenseLoaded = false;
-        this.adSenseTimeout = 3000; // 3 seconds timeout for AdSense
         this.adContainers = new Map();
         this.isMobile = window.innerWidth <= 768;
         this.socialBarLoaded = false;
@@ -55,15 +35,8 @@ class AdManager {
         this.loadPopunder();
         this.loadSocialBar();
 
-        // Check if AdSense is available
-        this.checkAdSense().then(isAvailable => {
-            this.adSenseLoaded = isAvailable;
-            console.log('AdSense available:', isAvailable);
-
-            // Load initial ads
-            this.loadHeaderAd();
-            this.loadInContentAds();
-        });
+        // Load initial ads
+        this.loadHeaderAd();
 
         // Listen for scroll to lazy load ads
         this.setupLazyLoading();
@@ -72,34 +45,6 @@ class AdManager {
     markContainerSafe(container) {
         if (!container) return;
         container.setAttribute('data-allow-scripts', 'true');
-    }
-
-    // Check if AdSense is loaded and working
-    async checkAdSense() {
-        return new Promise((resolve) => {
-            // Set timeout
-            const timeout = setTimeout(() => {
-                console.log('AdSense timeout - using fallback');
-                resolve(false);
-            }, this.adSenseTimeout);
-
-            // Check if adsbygoogle is available
-            if (typeof window.adsbygoogle !== 'undefined') {
-                clearTimeout(timeout);
-                resolve(true);
-            } else {
-                // Wait a bit and check again
-                setTimeout(() => {
-                    if (typeof window.adsbygoogle !== 'undefined') {
-                        clearTimeout(timeout);
-                        resolve(true);
-                    } else {
-                        clearTimeout(timeout);
-                        resolve(false);
-                    }
-                }, 1000);
-            }
-        });
     }
 
     // Load popunder ad (Adsterra only)
@@ -137,179 +82,10 @@ class AdManager {
         if (!container) return;
         this.markContainerSafe(container);
 
-        if (this.adSenseLoaded) {
-            // Try AdSense first
-            this.loadAdSenseDisplay(container, 'header');
+        if (this.isMobile) {
+            this.loadAdsterraMobileBanner(container, 'header');
         } else {
-            // Use Adsterra
-            if (this.isMobile) {
-                this.loadAdsterraMobileBanner(container, 'header');
-            } else {
-                this.loadAdsterraDesktopBanner(container, 'header');
-            }
-        }
-    }
-
-    // Load in-content ads (between gallery items)
-    loadInContentAds() {
-        // These will be loaded dynamically as content loads
-        // Called from app.js after rendering gallery items
-    }
-
-    // Load AdSense Display Ad
-    loadAdSenseDisplay(container, adId) {
-        if (this.initializedAds.has(`adsense-${adId}`)) return;
-
-        const adHtml = `
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-9258235332675012"
-                 data-ad-slot="9026742119"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-        `;
-
-        container.innerHTML = adHtml;
-        container.classList.add('ad-loaded');
-        this.markContainerSafe(container);
-
-        try {
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-            this.initializedAds.add(`adsense-${adId}`);
-
-            // Check if ad loaded successfully after 2 seconds
-            setTimeout(() => {
-                this.checkAdLoaded(container, adId);
-            }, 2000);
-        } catch (e) {
-            console.error('AdSense error:', e);
-            this.loadFallbackAd(container, adId);
-        }
-    }
-
-    // Load AdSense In-Article Ad
-    loadAdSenseInArticle(container, adId) {
-        if (this.initializedAds.has(`adsense-article-${adId}`)) return;
-
-        const adHtml = `
-            <ins class="adsbygoogle"
-                 style="display:block; text-align:center;"
-                 data-ad-layout="in-article"
-                 data-ad-format="fluid"
-                 data-ad-client="ca-pub-9258235332675012"
-                 data-ad-slot="5195292409"></ins>
-        `;
-
-        container.innerHTML = adHtml;
-        container.classList.add('ad-loaded');
-        this.markContainerSafe(container);
-
-        try {
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-            this.initializedAds.add(`adsense-article-${adId}`);
-
-            setTimeout(() => {
-                this.checkAdLoaded(container, adId);
-            }, 2000);
-        } catch (e) {
-            console.error('AdSense error:', e);
-            this.loadFallbackAd(container, adId);
-        }
-    }
-
-    // Load AdSense In-Feed Ad
-    loadAdSenseInFeed(container, adId) {
-        if (this.initializedAds.has(`adsense-feed-${adId}`)) return;
-
-        const adHtml = `
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-format="fluid"
-                 data-ad-layout-key="-73+ed+2i-1n-4w"
-                 data-ad-client="ca-pub-9258235332675012"
-                 data-ad-slot="7629884051"></ins>
-        `;
-
-        container.innerHTML = adHtml;
-        container.classList.add('ad-loaded');
-        this.markContainerSafe(container);
-
-        try {
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-            this.initializedAds.add(`adsense-feed-${adId}`);
-
-            setTimeout(() => {
-                this.checkAdLoaded(container, adId);
-            }, 2000);
-        } catch (e) {
-            console.error('AdSense error:', e);
-            this.loadFallbackAd(container, adId);
-        }
-    }
-
-    // Load AdSense Multiplex Ad
-    loadAdSenseMultiplex(container, adId) {
-        if (this.initializedAds.has(`adsense-multiplex-${adId}`)) return;
-
-        const adHtml = `
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-format="autorelaxed"
-                 data-ad-client="ca-pub-9258235332675012"
-                 data-ad-slot="8731939089"></ins>
-        `;
-
-        container.innerHTML = adHtml;
-        container.classList.add('ad-loaded');
-        this.markContainerSafe(container);
-
-        try {
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-            this.initializedAds.add(`adsense-multiplex-${adId}`);
-
-            setTimeout(() => {
-                this.checkAdLoaded(container, adId);
-            }, 2000);
-        } catch (e) {
-            console.error('AdSense error:', e);
-            this.loadFallbackAd(container, adId);
-        }
-    }
-
-    // Check if AdSense ad loaded successfully
-    checkAdLoaded(container, adId) {
-        const ins = container.querySelector('ins.adsbygoogle');
-        if (!ins) {
-            this.loadFallbackAd(container, adId);
-            return;
-        }
-
-        // Check if ad has been filled
-        const isAdFilled = ins.getAttribute('data-ad-status') === 'filled' ||
-            ins.offsetHeight > 0;
-
-        if (!isAdFilled) {
-            console.log(`AdSense ad ${adId} not filled, loading fallback`);
-            this.loadFallbackAd(container, adId);
-        }
-    }
-
-    // Load fallback ad (Adsterra)
-    loadFallbackAd(container, adId) {
-        // Clear AdSense ad
-        container.innerHTML = '';
-        this.markContainerSafe(container);
-
-        // Load appropriate Adsterra ad based on position
-        if (adId && adId.includes('header')) {
-            if (this.isMobile) {
-                this.loadAdsterraMobileBanner(container, adId);
-            } else {
-                this.loadAdsterraDesktopBanner(container, adId);
-            }
-        } else {
-            // Use native banner for in-content
-            this.loadAdsterraNative(container, adId);
+            this.loadAdsterraDesktopBanner(container, 'header');
         }
     }
 
@@ -446,27 +222,8 @@ class AdManager {
 
     // Load ad based on type
     loadAdByType(container, adType, adId) {
-        if (this.adSenseLoaded) {
-            switch (adType) {
-                case 'display':
-                    this.loadAdSenseDisplay(container, adId);
-                    break;
-                case 'in-article':
-                    this.loadAdSenseInArticle(container, adId);
-                    break;
-                case 'in-feed':
-                    this.loadAdSenseInFeed(container, adId);
-                    break;
-                case 'multiplex':
-                    this.loadAdSenseMultiplex(container, adId);
-                    break;
-                default:
-                    this.loadAdSenseDisplay(container, adId);
-            }
-        } else {
-            // Use Adsterra fallback
-            this.loadAdsterraNative(container, adId);
-        }
+        // Always use Adsterra Native for in-content spots
+        this.loadAdsterraNative(container, adId);
     }
 
     // Public method to add in-content ad after gallery items
@@ -491,4 +248,3 @@ class AdManager {
         }
     }
 }
-

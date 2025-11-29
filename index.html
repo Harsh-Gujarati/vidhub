@@ -227,149 +227,151 @@
                     </div>
                     <button class="primary-btn" id="vip-upgrade-btn" type="button">Upgrade to VIP</button>
                 </div>
-                <div class="gallery vip-gallery" id="vip-gallery"></div>
-            </section>
-            <div class="ad-container" data-ad-type="display" data-ad-id="footer-display" data-allow-scripts="true">
-            </div>
-        </div>
-    </main>
-
-    <!-- User Area -->
-    <section class="user-area" id="user-area">
-        <div class="container">
-            <div class="user-area-header">
-                <h2>User Hub</h2>
-                <span class="vip-pill" id="vip-status-pill">Free Member</span>
-            </div>
-            <div class="user-card" id="user-card">
-                <div class="user-card-info">
-                    <div class="profile-avatar" id="user-panel-avatar"></div>
-                    <div>
-                        <p class="user-name" id="user-panel-name">Sign in to personalize your feed</p>
-                        <small class="user-email" id="user-panel-email"></small>
-                    </div>
-                </div>
-                <div class="user-card-actions">
-                    <button class="primary-btn ghost" id="user-login-cta" type="button">Sign in with Google</button>
-                    <button class="text-btn" type="button" data-logout>Logout</button>
-                </div>
-            </div>
-            <div class="saved-section">
-                <div class="section-header compact">
-                    <h3 class="section-title">Saved Videos</h3>
-                    <p class="section-subtitle" id="saved-count">0 saved</p>
-                </div>
-                <div id="saved-videos-list" class="saved-list">
-                    <div class="empty-state">
-                        <p>Sign in and start saving your favorite drops for later.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Video Modal -->
-    <div class="modal" id="video-modal">
-        <div class="modal-backdrop"></div>
-        <div class="modal-content">
-            <button class="modal-close" id="close-video-modal">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
-            </button>
-            <div class="modal-body">
-                <video id="modal-video" controls autoplay loop></video>
-                <div class="modal-info">
-                    <div class="modal-stats">
-                        <span class="modal-stat">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path
-                                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
-                                </path>
-                            </svg>
-                            <span id="modal-reactions">0</span>
-                        </span>
-                        <span class="modal-stat">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                            </svg>
-                            <span id="modal-comments">0</span>
-                        </span>
-                        <span class="modal-stat">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                            </svg>
-                            <span id="modal-collected">0</span>
-                        </span>
+                </button>
+                <div class="modal-body">
+                    <video id="modal-video" controls autoplay loop></video>
+                    <div class="modal-info">
+                        <div class="modal-stats">
+                            <span class="modal-stat">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                    </path>
+                                </svg>
+                                <span id="modal-reactions">0</span>
+                            </span>
+                            <span class="modal-stat">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                <span id="modal-comments">0</span>
+                            </span>
+                            <span class="modal-stat">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                <span id="modal-collected">0</span>
+                            </span>
+                        </div>
+                        <div class="modal-user">
+                            <div class="user-avatar" id="modal-user-avatar"></div>
+                            <span class="user-name" id="modal-user-name">Unknown</span>
+                        </div>
                     </div>
-                    <div class="modal-user">
-                        <div class="user-avatar" id="modal-user-avatar"></div>
-                        <span class="user-name" id="modal-user-name">Unknown</span>
+                </div>
+        </div>
+        </div>
+
+        <!-- Image Modal -->
+        <div class="modal" id="image-modal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <button class="modal-close" id="close-image-modal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="modal-body">
+                    <img id="modal-image" alt="Full size image">
+                    <div class="modal-info">
+                        <div class="modal-stats">
+                            <span class="modal-stat">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                    </path>
+                                </svg>
+                                <span id="modal-image-reactions">0</span>
+                            </span>
+                            <span class="modal-stat">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                <span id="modal-image-comments">0</span>
+                            </span>
+                            <span class="modal-stat">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                <span id="modal-image-collected">0</span>
+                            </span>
+                        </div>
+                        <div class="modal-user">
+                            <div class="user-avatar" id="modal-image-user-avatar"></div>
+                            <span class="user-name" id="modal-image-user-name">Unknown</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Image Modal -->
-    <div class="modal" id="image-modal">
-        <div class="modal-backdrop"></div>
-        <div class="modal-content">
-            <button class="modal-close" id="close-image-modal">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-            <div class="modal-body">
-                <img id="modal-image" alt="Full size image">
-                <div class="modal-info">
-                    <div class="modal-stats">
-                        <span class="modal-stat">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path
-                                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
-                                </path>
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <div class="logo">
+                            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <rect width="32" height="32" rx="8" fill="url(#footer-logo-gradient)" />
+                                <path d="M12 10L20 16L12 22V10Z" fill="white" />
+                                <defs>
+                                    <linearGradient id="footer-logo-gradient" x1="0" y1="0" x2="32" y2="32">
+                                        <stop offset="0%" stop-color="#667eea" />
+                                        <stop offset="100%" stop-color="#764ba2" />
+                                    </linearGradient>
+                                </defs>
                             </svg>
-                            <span id="modal-image-reactions">0</span>
-                        </span>
-                        <span class="modal-stat">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                            </svg>
-                            <span id="modal-image-comments">0</span>
-                        </span>
-                        <span class="modal-stat">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                            </svg>
-                            <span id="modal-image-collected">0</span>
-                        </span>
+                            <span class="logo-text">PromptLunarX</span>
+                        </div>
+                        <p class="footer-description">Discover and explore amazing AI-generated videos and images from
+                            the
+                            creative community.</p>
                     </div>
-                    <div class="modal-user">
-                        <div class="user-avatar" id="modal-image-user-avatar"></div>
-                        <span class="user-name" id="modal-image-user-name">Unknown</span>
+                    <div class="footer-links">
+                        <div class="footer-column">
+                            <h3 class="footer-heading">Legal</h3>
+                            <ul class="footer-list">
+                                <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                                <li><a href="terms-of-service.html">Terms of Service</a></li>
+                                <li><a href="dmca.html">DMCA Policy</a></li>
+                            </ul>
+                        </div>
+                        <div class="footer-column">
+                            <h3 class="footer-heading">Support</h3>
+                            <ul class="footer-list">
+                                <li><a href="contact.html">Contact Us</a></li>
+                                <li><a href="about.html">About Us</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2025 PromptLunarX. All rights reserved.</p>
+                    <p class="footer-disclaimer">Content sourced from Civitai API. We are not affiliated with Civitai.
+                    </p>
+                </div>
             </div>
-        </div>
-    </div>
+        </footer>
 
-    <!-- Security Layer - Load First -->
-    <script src="security.js" data-allowed></script>
-    <script src="api-security.js" data-allowed></script>
+        <!-- Security Layer - Load First -->
+        <script src="security.js" data-allowed></script>
+        <script src="api-security.js" data-allowed></script>
 
-    <!-- Analytics + Ads + Main Application -->
-    <script type="module" src="analytics.bundle.js" data-allowed></script>
-    <script src="ad-manager.js" data-allowed defer></script>
-    <script src="app.js" data-allowed></script>
+        <!-- Analytics + Ads + Main Application -->
+        <script type="module" src="analytics.bundle.js" data-allowed></script>
+        <script src="ad-manager.js" data-allowed defer></script>
+        <script src="app.js" data-allowed></script>
 </body>
 
 </html>

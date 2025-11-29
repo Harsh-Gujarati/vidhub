@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - PromptLunarX</title>
+    <meta name="description" content="Contact PromptLunarX - Get in touch with us for support, inquiries, or feedback.">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="32" height="32" rx="8" fill="url(#logo-gradient)" />
+                        <path d="M12 10L20 16L12 22V10Z" fill="white" />
+                        <defs>
+                            <linearGradient id="logo-gradient" x1="0" y1="0" x2="32" y2="32">
+                                <stop offset="0%" stop-color="#667eea" />
+                                <stop offset="100%" stop-color="#764ba2" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <span class="logo-text">PromptLunarX</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container" style="max-width: 700px;">
+            <h1 style="margin-bottom: 1rem;">Contact Us</h1>
+            <p style="color: var(--text-secondary); margin-bottom: 3rem;">Have a question, suggestion, or need support?
+                We'd love to hear from you!</p>
+
+            <div
+                style="background: var(--card-bg); padding: 2rem; border-radius: var(--radius-xl); margin-bottom: 2rem;">
+                <h2 style="margin-bottom: 1.5rem;">Send us a Message</h2>
+                <form id="contact-form" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div>
+                        <label for="name" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Name</label>
+                        <input type="text" id="name" name="name" required
+                            style="width: 100%; padding: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-primary);">
+                    </div>
+
+                    <div>
+                        <label for="email"
+                            style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email</label>
+                        <input type="email" id="email" name="email" required
+                            style="width: 100%; padding: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-primary);">
+                    </div>
+
+                    <div>
+                        <label for="subject"
+                            style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Subject</label>
+                        <select id="subject" name="subject" required
+                            style="width: 100%; padding: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-primary);">
+                            <option value="">Select a subject</option>
+                            <option value="general">General Inquiry</option>
+                            <option value="support">Technical Support</option>
+                            <option value="dmca">DMCA / Copyright</option>
+                            <option value="advertising">Advertising</option>
+                            <option value="feedback">Feedback</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="message"
+                            style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Message</label>
+                        <textarea id="message" name="message" rows="6" required
+                            style="width: 100%; padding: 0.75rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-family: var(--font-primary); resize: vertical;"></textarea>
+                    </div>
+
+                    <button type="submit" class="primary-btn" style="align-self: flex-start;">
+                        Send Message
+                    </button>
+                </form>
+                <div id="form-message" style="margin-top: 1rem; display: none;"></div>
+            </div>
+
+            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: var(--radius-xl);">
+                <h2 style="margin-bottom: 1.5rem;">Other Ways to Reach Us</h2>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div>
+                        <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">Email</h3>
+                        <p style="color: var(--text-secondary);">support@promptlunarx.com</p>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">Response Time</h3>
+                        <p style="color: var(--text-secondary);">We typically respond within 24-48 hours</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+                <p>&copy; 2025 PromptLunarX. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('contact-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const messageDiv = document.getElementById('form-message');
+            messageDiv.style.display = 'block';
+            messageDiv.style.padding = '1rem';
+            messageDiv.style.borderRadius = 'var(--radius-md)';
+            messageDiv.style.background = 'var(--accent-gradient)';
+            messageDiv.style.color = 'white';
+            messageDiv.textContent = 'Thank you for your message! We will get back to you soon.';
+            this.reset();
+
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        });
+    </script>
+</body>
+
+</html>
