@@ -582,11 +582,91 @@ const switchSection = (section) => {
     }
 };
 
+// ===== VIP FUNCTIONS =====
+const handleVipUpgrade = () => {
+    alert('VIP upgrade feature coming soon!');
+};
+
+// ===== STREAM PLAYER =====
+const initStreamPlayer = () => {
+    const input = document.getElementById('stream-url-input');
+    const btn = document.getElementById('stream-play-btn');
+    const wrapper = document.getElementById('stream-player-wrapper');
+
+    if (!input || !btn || !wrapper) return;
+
+    const playVideo = () => {
+        const url = input.value.trim();
+        if (!url) return;
+
+        // Extract Google Drive ID
+        let videoId = null;
+
+        // Patterns
+        // https://drive.google.com/file/d/VIDEO_ID/view
+        // https://drive.google.com/open?id=VIDEO_ID
+
+        const patterns = [
+            /file\/d\/([a-zA-Z0-9_-]+)/,
+            /id=([a-zA-Z0-9_-]+)/
+        ];
+
+        for (const pattern of patterns) {
+            const match = url.match(pattern);
+            if (match && match[1]) {
+                videoId = match[1];
+                break;
+            }
+        }
+
+        if (videoId) {
+            // Google Drive Video
+            wrapper.innerHTML = `
+                <iframe 
+                    src="https://drive.google.com/file/d/${videoId}/preview" 
+                    class="stream-iframe" 
+                    allow="autoplay; encrypted-media" 
+                    allowfullscreen>
+                </iframe>
+            `;
+        } else {
+            // Try generic video tag for direct links
+            wrapper.innerHTML = `
+                <video controls autoplay class="stream-iframe" style="object-fit: contain; background: black;">
+                    <source src="${url}">
+                    Your browser does not support the video tag.
+                </video>
+            `;
+
+            // Handle error
+            const video = wrapper.querySelector('video');
+            video.onerror = () => {
+                wrapper.innerHTML = `
+                    <div class="player-placeholder">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1" style="opacity: 0.8;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <p style="color: #ef4444; text-align: center;">Could not play video.<br>Please ensure the URL is a direct link or a valid Google Drive link.</p>
+                    </div>
+                `;
+            };
+        }
+    };
+
+    btn.addEventListener('click', playVideo);
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') playVideo();
+    });
+};
+
 // ===== INITIALIZATION =====
 const init = () => {
     // Set initial theme
     setTheme(state.theme);
     setupGoogleAuth();
+    initStreamPlayer();
 
     // Theme toggle
     const themeToggle = document.getElementById('theme-toggle');
@@ -645,7 +725,7 @@ const init = () => {
 
     const vipUpgradeBtn = document.getElementById('vip-upgrade-btn');
     if (vipUpgradeBtn) {
-        vipUpgradeBtn.addEventListener('click', handleVipUpgrade);
+        vipUpgradeBtn.addEventListener('click', handleVipUpgrade); // Assuming handleVipUpgrade is defined elsewhere or this line was already there
     }
 
     const loginCTA = document.getElementById('user-login-cta');
