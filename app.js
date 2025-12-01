@@ -207,23 +207,38 @@ const fetchVideos = async (cursor = null) => {
         // Deep clone the params to avoid modifying the original
         const params = JSON.parse(JSON.stringify(API.videos.params));
 
-        // Add cursor if provided (for pagination)
-        if (cursor) {
-            params.cursor = cursor;
-        }
+        // Add cursor (null for first request, or nextCursor for pagination)
+        params.cursor = cursor || null;
 
-        // Wrap params in json object for API
-        const apiUrl = `${API.videos.base}?input=${encodeURIComponent(JSON.stringify({ json: params }))}`;
+        // Wrap params in the exact format Civitai expects
+        const input = {
+            json: params,
+            meta: {
+                values: {
+                    cursor: [cursor ? "defined" : "undefined"]
+                }
+            }
+        };
+
+        const apiUrl = `${API.videos.base}?input=${encodeURIComponent(JSON.stringify(input))}`;
         const proxyUrl = `${getProxyUrl()}/?url=${encodeURIComponent(apiUrl)}`;
 
         console.log('Fetching videos with cursor:', cursor);
+        console.log('API URL:', apiUrl);
+
         const response = await fetch(proxyUrl);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
+        console.log('API Response:', data);
 
         if (data.result && data.result.data && data.result.data.json) {
             const { items, nextCursor } = data.result.data.json;
 
-            console.log('Received items:', items.length, 'Next cursor:', nextCursor);
+            console.log('✅ Received items:', items.length, 'Next cursor:', nextCursor);
 
             state.videos.items = cursor ? [...state.videos.items, ...items] : items;
             state.videos.cursor = nextCursor;
@@ -234,6 +249,9 @@ const fetchVideos = async (cursor = null) => {
             if (nextCursor && loadMoreBtn) {
                 loadMoreBtn.style.display = 'flex';
             }
+        } else {
+            console.error('❌ Unexpected API response structure:', data);
+            throw new Error('Invalid API response structure');
         }
     } catch (error) {
         console.error('Error fetching videos:', error);
@@ -265,23 +283,38 @@ const fetchImages = async (cursor = null) => {
         // Deep clone the params to avoid modifying the original
         const params = JSON.parse(JSON.stringify(API.images.params));
 
-        // Add cursor if provided (for pagination)
-        if (cursor) {
-            params.cursor = cursor;
-        }
+        // Add cursor (null for first request, or nextCursor for pagination)
+        params.cursor = cursor || null;
 
-        // Wrap params in json object for API
-        const apiUrl = `${API.images.base}?input=${encodeURIComponent(JSON.stringify({ json: params }))}`;
+        // Wrap params in the exact format Civitai expects
+        const input = {
+            json: params,
+            meta: {
+                values: {
+                    cursor: [cursor ? "defined" : "undefined"]
+                }
+            }
+        };
+
+        const apiUrl = `${API.images.base}?input=${encodeURIComponent(JSON.stringify(input))}`;
         const proxyUrl = `${getProxyUrl()}/?url=${encodeURIComponent(apiUrl)}`;
 
         console.log('Fetching images with cursor:', cursor);
+        console.log('API URL:', apiUrl);
+
         const response = await fetch(proxyUrl);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
+        console.log('API Response:', data);
 
         if (data.result && data.result.data && data.result.data.json) {
             const { items, nextCursor } = data.result.data.json;
 
-            console.log('Received items:', items.length, 'Next cursor:', nextCursor);
+            console.log('✅ Received items:', items.length, 'Next cursor:', nextCursor);
 
             state.images.items = cursor ? [...state.images.items, ...items] : items;
             state.images.cursor = nextCursor;
@@ -291,6 +324,9 @@ const fetchImages = async (cursor = null) => {
             if (nextCursor && loadMoreBtn) {
                 loadMoreBtn.style.display = 'flex';
             }
+        } else {
+            console.error('❌ Unexpected API response structure:', data);
+            throw new Error('Invalid API response structure');
         }
     } catch (error) {
         console.error('Error fetching images:', error);
@@ -546,6 +582,164 @@ const closeImageModal = () => {
     modal.classList.remove('active');
     image.src = '';
     document.body.style.overflow = '';
+};
+
+// ===== RENDER FUNCTIONS =====
+const renderVideos = () => {
+    const galleryEl = document.getElementById('videos-gallery');
+    if (!galleryEl) return;
+
+    if (state.videos.items.length === 0) {
+        return; // Loading spinner will show
+    }
+
+    const isLoggedIn = !!state.user;
+
+    galleryEl.innerHTML = state.videos.items.map(item => {
+        const itemId = getItemId(item);
+        const isLiked = isLoggedIn && state.userData.likes.has(itemId);
+        const isSaved = isLoggedIn && state.userData.saved.some(s => s.id === itemId);
+        const isPremium = isPremiumContent(item);
+        const itemJson = JSON.stringify(item).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+        return `
+            <div class="gallery-item" data-id="${itemId}">
+                <div class="gallery-item-media" onclick='openVideoModal(${itemJson})' style="cursor: pointer;"> 
+                    <video 
+                        src="${getVideoUrl(item.url)}" 
+                        poster="${getImageUrl(item.url)}"
+                        loop
+                        muted
+                        playsinline
+                        onmouseenter="this.play()"
+                        onmouseleave="this.pause()"
+                        style="width: 100%; height: 100%; object-fit: cover;"
+                    ></video>
+                    ${isPremium ? '<div class="premium-badge">Premium</div>' : ''}
+                </div>
+                <div class="gallery-item-info">
+                    <div class="gallery-item-stats">
+                        <span class="stat-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                            <span>${formatNumber(item.reactionCount || 0)}</span>
+                        </span>
+                        ${isLoggedIn ? `
+                            <button class="stat-btn ${isLiked ? 'active' : ''}" onclick='event.stopPropagation(); toggleLike(${itemJson}); renderVideos();'>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
+                            <button class="stat-btn ${isSaved ? 'active' : ''}" onclick='event.stopPropagation(); toggleSave(${itemJson}); renderVideos();'>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    console.log('✅ Rendered', state.videos.items.length, 'videos');
+};
+
+const renderImages = () => {
+    const galleryEl = document.getElementById('images-gallery');
+    if (!galleryEl) return;
+
+    if (state.images.items.length === 0) {
+        return; // Loading spinner will show
+    }
+
+    const isLoggedIn = !!state.user;
+
+    galleryEl.innerHTML = state.images.items.map(item => {
+        const itemId = getItemId(item);
+        const isLiked = isLoggedIn && state.userData.likes.has(itemId);
+        const isSaved = isLoggedIn && state.userData.saved.some(s => s.id === itemId);
+        const isPremium = isPremiumContent(item);
+        const itemJson = JSON.stringify(item).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+        return `
+            <div class="gallery-item" data-id="${itemId}">
+                <div class="gallery-item-media" onclick='openImageModal(${itemJson})' style="cursor: pointer;"> 
+                    <img src="${getImageUrl(item.url)}" alt="${getItemTitle(item)}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
+                    ${isPremium ? '<div class="premium-badge">Premium</div>' : ''}
+                </div>
+                <div class="gallery-item-info">
+                    <div class="gallery-item-stats">
+                        <span class="stat-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                            <span>${formatNumber(item.reactionCount || 0)}</span>
+                        </span>
+                        ${isLoggedIn ? `
+                            <button class="stat-btn ${isLiked ? 'active' : ''}" onclick='event.stopPropagation(); toggleLike(${itemJson}); renderImages();'>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
+                            <button class="stat-btn ${isSaved ? 'active' : ''}" onclick='event.stopPropagation(); toggleSave(${itemJson}); renderImages();'>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    console.log('✅ Rendered', state.images.items.length, 'images');
+};
+
+const renderVipVideos = () => {
+    console.log('VIP videos rendered');
+};
+
+const renderSavedVideos = () => {
+    console.log('Saved videos:', state.userData.saved.length);
+};
+
+const updateUserUI = () => {
+    const authPrompt = document.getElementById('vip-auth-prompt');
+    const userChip = document.querySelector('.user-chip');
+    const signInButton = document.getElementById('google-signin-button');
+
+    if (state.user) {
+        // User is signed in
+        if (authPrompt) authPrompt.style.display = 'none';
+
+        if (userChip) {
+            userChip.style.display = 'flex';
+        }
+
+        if (signInButton && signInButton.parentElement) {
+            signInButton.parentElement.style.display = 'none';
+        }
+
+        console.log('✅ User signed in:', state.user.name);
+    } else {
+        // User is not signed in
+        if (userChip) {
+            userChip.style.display = 'none';
+        }
+
+        if (signInButton && signInButton.parentElement) {
+            signInButton.parentElement.style.display = 'block';
+        }
+
+        console.log('ℹ️ User not signed in');
+    }
+
+    // Re-render galleries to update like/save buttons
+    if (state.videos.items.length > 0) renderVideos();
+    if (state.images.items.length > 0) renderImages();
 };
 
 // ===== THEME FUNCTIONS =====
