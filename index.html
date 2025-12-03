@@ -244,6 +244,46 @@
                 </div>
                 <div class="gallery" id="mega-gallery"></div>
             </section>
+
+            <!-- Video Modal -->
+            <div id="video-modal" class="modal">
+                <div class="modal-backdrop" onclick="closeVideoModal()"></div>
+                <div class="modal-content">
+                    <button class="modal-close" id="close-video-modal" onclick="closeVideoModal()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                    <video id="modal-video" controls autoplay style="width: 100%; max-height: 80vh; background: #000;"></video>
+                    <div class="modal-info" style="padding: 1.5rem;">
+                        <div class="modal-stats">
+                            <span class="modal-stat">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                                <span id="modal-reactions">0</span>
+                            </span>
+                            <span class="modal-stat">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                <span id="modal-comments">0</span>
+                            </span>
+                            <span class="modal-stat">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                <span id="modal-collected">0</span>
+                            </span>
+                        </div>
+                        <div class="modal-user">
+                            <div class="user-avatar" id="modal-user-avatar"></div>
+                            <span class="user-name" id="modal-user-name">Unknown</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Footer -->

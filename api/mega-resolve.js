@@ -57,10 +57,8 @@ module.exports = async (req, res) => {
                 const children = megaFile.children || [];
 
                 for (const child of children) {
-                    // Check if it's a video file
-                    const isVideo = child.name && /\.(mp4|webm|ogg|mov|avi|mkv|flv|wmv|m4v)$/i.test(child.name);
-
-                    if (isVideo && !child.directory) {
+                    // Treat all files as videos (user confirmed all files in folder are videos)
+                    if (!child.directory) {
                         try {
                             // Get download URL for streaming
                             const downloadUrl = await getDownloadUrl(child);
@@ -80,26 +78,24 @@ module.exports = async (req, res) => {
                     }
                 }
             } else {
-                // It's a single file - check if it's a video
-                const isVideo = megaFile.name && /\.(mp4|webm|ogg|mov|avi|mkv|flv|wmv|m4v)$/i.test(megaFile.name);
+                // It's a single file - treat as video (user confirmed all files are videos)
+                try {
+                    const downloadUrl = await getDownloadUrl(megaFile);
 
-                if (isVideo) {
-                    try {
-                        const downloadUrl = await getDownloadUrl(megaFile);
-
-                        videos.push({
-                            id: megaFile.nodeId || megaFile.name,
-                            name: megaFile.name,
-                            size: megaFile.size,
-                            streamUrl: downloadUrl,
-                            thumbnail: null,
-                            duration: null
-                        });
-                    } catch (error) {
-                        console.error(`Error processing ${megaFile.name}:`, error.message);
-                    }
-                } else {
-                    res.status(400).json({ error: 'The provided MEGA link is not a video file' });
+                    videos.push({
+                        id: megaFile.nodeId || megaFile.name,
+                        name: megaFile.name,
+                        size: megaFile.size,
+                        streamUrl: downloadUrl,
+                        thumbnail: null,
+                        duration: null
+                    });
+                } catch (error) {
+                    console.error(`Error processing ${megaFile.name}:`, error.message);
+                    res.status(500).json({ 
+                        error: 'Failed to process MEGA file',
+                        message: error.message 
+                    });
                     return;
                 }
             }

@@ -552,7 +552,7 @@ const openVideoModal = (item) => {
     document.body.style.overflow = 'hidden';
 };
 
-const closeVideoModal = () => {
+window.closeVideoModal = () => {
     const modal = document.getElementById('video-modal');
     const video = document.getElementById('modal-video');
 
@@ -1071,11 +1071,14 @@ window.openMegaVideoModal = (item) => {
         ? getMegaStreamUrl(item.megaUrl, item.nodeId)
         : item.streamUrl;
 
+    // Set video source and ensure it plays
     video.src = videoSrc;
+    video.load(); // Reload the video element
+    
     reactions.textContent = '0';
     comments.textContent = '0';
     collected.textContent = '0';
-    userName.textContent = 'MEGA Video';
+    userName.textContent = item.name || 'MEGA Video';
 
     if (userAvatar) {
         userAvatar.textContent = 'M';
@@ -1083,6 +1086,11 @@ window.openMegaVideoModal = (item) => {
 
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
+
+    // Try to play the video when modal opens
+    video.play().catch(err => {
+        console.log('Autoplay blocked, user will need to click play:', err);
+    });
 };
 
 const initMegaVideos = () => {
