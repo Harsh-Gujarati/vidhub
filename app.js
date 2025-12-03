@@ -15,7 +15,11 @@ const state = {
     user: null,
     userStore: {},
     userData: null,
-    premiumVideos: []
+    premiumVideos: [],
+    megaVideos: {
+        items: [],
+        loading: false
+    }
 };
 
 let adInjectionSeed = 0;
@@ -773,6 +777,8 @@ const switchSection = (section) => {
         fetchVideos();
     } else if (section === 'images' && state.images.items.length === 0) {
         fetchImages();
+    } else if (section === 'terabox' && (!state.megaVideos || state.megaVideos.items.length === 0)) {
+        fetchMegaVideos();
     }
 };
 
@@ -855,125 +861,189 @@ const initStreamPlayer = () => {
     });
 };
 
-// ===== TERABOX PLAYER (DEDICATED) =====
-// Uses backend resolver to get direct video stream URL
-const TERABOX_VIDEO_URL = 'https://teraboxurl.com/s/1YvMt6-56oPAkYVyZGbe8ZA';
+// ===== MEGA VIDEO SECTION =====
+// Fetches videos from MEGA folder and displays them in a grid
+const MEGA_FOLDER_URL = process.env.MEGA_FOLDER_URL || 'https://mega.nz/folder/YOUR_FOLDER_ID#YOUR_KEY';
 
-const getTeraboxApiUrl = () => {
+const getMegaApiUrl = () => {
     // Check if running on localhost
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'http://localhost:3000/api/terabox/resolve';
+        return 'http://localhost:3000/api/mega/resolve';
     }
     // Use current domain for production (Vercel)
-    return `${window.location.origin}/api/terabox/resolve`;
+    return `${window.location.origin}/api/mega/resolve`;
 };
 
-const initTeraboxPlayer = () => {
-    const playBtn = document.getElementById('terabox-play-btn');
-    const wrapper = document.getElementById('terabox-player-wrapper');
+const getMegaStreamUrl = (megaUrl, nodeId) => {
+    const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:3000'
+        : window.location.origin;
+    return `${baseUrl}/api/mega-stream?megaUrl=${encodeURIComponent(megaUrl)}&nodeId=${encodeURIComponent(nodeId)}`;
+};
 
-    if (!playBtn || !wrapper) return;
+const fetchMegaVideos = async () => {
+    if (state.megaVideos.loading) return;
 
-    // Show initial placeholder
-    wrapper.innerHTML = `
-        <div class="player-placeholder">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-            </svg>
-            <p>Click "Play TeraBox Video" to load the video</p>
-        </div>
-    `;
+    state.megaVideos.loading = true;
+    const loadingEl = document.getElementById('mega-loading');
+    const galleryEl = document.getElementById('mega-gallery');
 
-    const resolveAndPlay = async () => {
-        // Show loading state
-        wrapper.innerHTML = `
-            <div class="player-placeholder">
-                <div class="spinner" style="width: 48px; height: 48px; border: 4px solid var(--border-color); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                <p>Resolving TeraBox link...</p>
-            </div>
-        `;
+    if (loadingEl) loadingEl.style.display = 'flex';
+    if (galleryEl) galleryEl.innerHTML = '';
 
-        try {
-            const response = await fetch(getTeraboxApiUrl(), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ shareUrl: TERABOX_VIDEO_URL })
-            });
+    try {
+        const response = await fetch(getMegaApiUrl(), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ megaUrl: MEGA_FOLDER_URL })
+        });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        }
 
-            const data = await response.json();
+        const data = await response.json();
 
-            if (!data.streamUrl) {
-                throw new Error('No stream URL returned from resolver');
-            }
+        if (!data.videos || data.videos.length === 0) {
+            throw new Error('No videos found in MEGA folder');
+        }
 
-            // Load video player with resolved URL
-            wrapper.innerHTML = `
-                <video
-                    controls
-                    autoplay
-                    class="stream-iframe"
-                    style="object-fit: contain; background: #000; width: 100%; height: 100%;"
-                    poster="${data.thumbnail || ''}"
-                >
-                    <source src="${data.streamUrl}" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-            `;
+        // Store videos in state
+        state.megaVideos.items = data.videos.map(video => ({
+            id: video.id,
+            name: video.name,
+            size: video.size,
+            streamUrl: video.streamUrl,
+            thumbnail: video.thumbnail,
+            url: video.streamUrl, // For compatibility with existing functions
+            megaUrl: MEGA_FOLDER_URL,
+            nodeId: video.id
+        }));
 
-            const video = wrapper.querySelector('video');
-            if (video) {
-                video.onerror = () => {
-                    wrapper.innerHTML = `
-                        <div class="player-placeholder">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1" style="opacity: 0.8;">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" y1="8" x2="12" y2="12"></line>
-                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                            </svg>
-                            <p style="color: #ef4444; text-align: center;">
-                                Could not play video.<br>
-                                The resolved URL may be invalid or expired.
-                            </p>
-                        </div>
-                    `;
-                };
+        renderMegaVideos();
 
-                // Try to play
-                video.play().catch(() => {
-                    // Autoplay blocked - user will need to click play
-                    console.log('Autoplay blocked - user interaction required');
-                });
-            }
-
-        } catch (error) {
-            console.error('TeraBox resolver error:', error);
-            wrapper.innerHTML = `
-                <div class="player-placeholder">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1" style="opacity: 0.8;">
+    } catch (error) {
+        console.error('MEGA fetch error:', error);
+        if (galleryEl) {
+            galleryEl.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="opacity: 0.5; margin-bottom: 1rem;">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="12" y1="8" x2="12" y2="12"></line>
                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                     </svg>
-                    <p style="color: #ef4444; text-align: center;">
-                        Failed to resolve TeraBox link.<br>
-                        <small style="opacity: 0.7;">${error.message}</small><br>
-                        <small style="opacity: 0.7; margin-top: 0.5rem; display: block;">
-                            Make sure your resolver service is configured in the backend.
-                        </small>
-                    </p>
+                    <p>Failed to load MEGA videos</p>
+                    <p style="font-size: 0.875rem; opacity: 0.7; margin-top: 0.5rem;">${error.message}</p>
                 </div>
             `;
         }
-    };
+    } finally {
+        state.megaVideos.loading = false;
+        if (loadingEl) loadingEl.style.display = 'none';
+    }
+};
 
-    playBtn.addEventListener('click', resolveAndPlay);
+const renderMegaVideos = () => {
+    const galleryEl = document.getElementById('mega-gallery');
+    if (!galleryEl) return;
+
+    if (state.megaVideos.items.length === 0) {
+        return;
+    }
+
+    const isLoggedIn = !!state.user;
+
+    galleryEl.innerHTML = state.megaVideos.items.map(item => {
+        const itemId = getItemId(item);
+        const isLiked = isLoggedIn && state.userData.likes.has(itemId);
+        const isSaved = isLoggedIn && state.userData.saved.some(s => s.id === itemId);
+        const itemJson = JSON.stringify(item).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+        // Use MEGA stream URL for video source
+        const videoSrc = item.streamUrl?.proxy 
+            ? getMegaStreamUrl(item.megaUrl, item.nodeId)
+            : item.streamUrl;
+
+        return `
+            <div class="gallery-item" data-id="${itemId}">
+                <div class="gallery-item-media" onclick='openMegaVideoModal(${itemJson})' style="cursor: pointer;">
+                    <video 
+                        src="${videoSrc}" 
+                        poster="${item.thumbnail || ''}"
+                        loop
+                        muted
+                        playsinline
+                        onmouseenter="this.play()"
+                        onmouseleave="this.pause()"
+                        style="width: 100%; height: 100%; object-fit: cover;"
+                    ></video>
+                    <div class="premium-badge">MEGA</div>
+                </div>
+                <div class="gallery-item-info">
+                    <div class="gallery-item-stats">
+                        <span class="stat-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            <span>${item.name || 'Video'}</span>
+                        </span>
+                        ${isLoggedIn ? `
+                            <button class="stat-btn ${isLiked ? 'active' : ''}" onclick='event.stopPropagation(); toggleLike(${itemJson}); renderMegaVideos();'>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
+                            <button class="stat-btn ${isSaved ? 'active' : ''}" onclick='event.stopPropagation(); toggleSave(${itemJson}); renderMegaVideos();'>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    console.log('✅ Rendered', state.megaVideos.items.length, 'MEGA videos');
+};
+
+// Open MEGA video in modal
+window.openMegaVideoModal = (item) => {
+    const modal = document.getElementById('video-modal');
+    const video = document.getElementById('modal-video');
+    const reactions = document.getElementById('modal-reactions');
+    const comments = document.getElementById('modal-comments');
+    const collected = document.getElementById('modal-collected');
+    const userAvatar = document.getElementById('modal-user-avatar');
+    const userName = document.getElementById('modal-user-name');
+
+    if (!modal || !video) return;
+
+    const videoSrc = item.streamUrl?.proxy 
+        ? getMegaStreamUrl(item.megaUrl, item.nodeId)
+        : item.streamUrl;
+
+    video.src = videoSrc;
+    reactions.textContent = '0';
+    comments.textContent = '0';
+    collected.textContent = '0';
+    userName.textContent = 'MEGA Video';
+
+    if (userAvatar) {
+        userAvatar.textContent = 'M';
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+};
+
+const initMegaVideos = () => {
+    // MEGA videos state is already initialized in state object
+    // This function is kept for consistency with other init functions
 };
 
 // ===== INITIALIZATION =====
@@ -982,7 +1052,7 @@ const init = () => {
     setTheme(state.theme);
     setupGoogleAuth();
     initStreamPlayer();
-    initTeraboxPlayer();
+    initMegaVideos();
 
     // Theme toggle
     const themeToggle = document.getElementById('theme-toggle');

@@ -1,6 +1,14 @@
 {
     "rewrites": [
         {
+            "source": "/api/mega/resolve",
+            "destination": "/api/mega-resolve"
+        },
+        {
+            "source": "/api/mega-stream/:path*",
+            "destination": "/api/mega-stream"
+        },
+        {
             "source": "/api/terabox/resolve",
             "destination": "/api/terabox-resolve"
         },
