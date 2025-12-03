@@ -882,7 +882,7 @@ const initStreamPlayer = () => {
 // ===== MEGA VIDEO SECTION =====
 // Fetches videos from MEGA folder and displays them in a grid
 // Set your MEGA folder URL here or via environment variable MEGA_FOLDER_URL
-const MEGA_FOLDER_URL = 'https://mega.nz/folder/YOUR_FOLDER_ID#YOUR_KEY'; // Replace with your MEGA folder link
+const MEGA_FOLDER_URL = 'https://mega.nz/folder/tvciAKjS#Qp3AqmE93ntkOnggUa7vqg';
 
 const getMegaApiUrl = () => {
     // Check if running on localhost
