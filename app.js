@@ -856,6 +856,7 @@ const initStreamPlayer = () => {
 };
 
 // ===== TERABOX PLAYER (DEDICATED) =====
+// Note: This expects the TeraBox URL to resolve to a direct-streamable video.
 const TERABOX_VIDEO_URL = 'https://teraboxurl.com/s/1YvMt6-56oPAkYVyZGbe8ZA';
 
 const initTeraboxPlayer = () => {
@@ -866,14 +867,35 @@ const initTeraboxPlayer = () => {
 
     const loadTeraboxVideo = () => {
         wrapper.innerHTML = `
-            <iframe
-                src="${TERABOX_VIDEO_URL}"
+            <video
+                controls
+                autoplay
                 class="stream-iframe"
-                allow="autoplay; encrypted-media; fullscreen"
-                allowfullscreen
-                data-allowed
-            ></iframe>
+                style="object-fit: contain; background: #000;"
+            >
+                <source src="${TERABOX_VIDEO_URL}">
+                Your browser does not support the video tag.
+            </video>
         `;
+
+        const video = wrapper.querySelector('video');
+        if (video) {
+            video.onerror = () => {
+                wrapper.innerHTML = `
+                    <div class="player-placeholder">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1" style="opacity: 0.8;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <p style="color: #ef4444; text-align: center;">
+                            Could not play TeraBox video.<br>
+                            Please ensure the link is a direct video URL that can be streamed.
+                        </p>
+                    </div>
+                `;
+            };
+        }
     };
 
     playBtn.addEventListener('click', loadTeraboxVideo);
