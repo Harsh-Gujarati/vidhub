@@ -196,7 +196,7 @@ const isPremiumContent = (item) => {
 };
 
 // ===== API FUNCTIONS =====
-const fetchVideos = async (cursor = null) => {
+window.fetchVideos = async (cursor = null) => {
     if (state.videos.loading) return;
 
     state.videos.loading = true;
@@ -262,7 +262,16 @@ const fetchVideos = async (cursor = null) => {
         if (galleryEl) {
             galleryEl.innerHTML = `
                 <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
-                    <p>Failed to load videos. Please try again later.</p>
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="opacity: 0.5; margin-bottom: 1rem;">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p>Failed to load videos</p>
+                    <p style="font-size: 0.875rem; opacity: 0.7; margin-top: 0.5rem;">${error.message}</p>
+                    <button onclick="fetchVideos()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        Retry
+                    </button>
                 </div>
             `;
         }
@@ -272,7 +281,7 @@ const fetchVideos = async (cursor = null) => {
     }
 };
 
-const fetchImages = async (cursor = null) => {
+window.fetchImages = async (cursor = null) => {
     if (state.images.loading) return;
 
     state.images.loading = true;
@@ -337,7 +346,16 @@ const fetchImages = async (cursor = null) => {
         if (galleryEl) {
             galleryEl.innerHTML = `
                 <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
-                    <p>Failed to load images. Please try again later.</p>
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="opacity: 0.5; margin-bottom: 1rem;">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p>Failed to load images</p>
+                    <p style="font-size: 0.875rem; opacity: 0.7; margin-top: 0.5rem;">${error.message}</p>
+                    <button onclick="fetchImages()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        Retry
+                    </button>
                 </div>
             `;
         }
@@ -863,7 +881,8 @@ const initStreamPlayer = () => {
 
 // ===== MEGA VIDEO SECTION =====
 // Fetches videos from MEGA folder and displays them in a grid
-const MEGA_FOLDER_URL = process.env.MEGA_FOLDER_URL || 'https://mega.nz/folder/YOUR_FOLDER_ID#YOUR_KEY';
+// Set your MEGA folder URL here or via environment variable MEGA_FOLDER_URL
+const MEGA_FOLDER_URL = 'https://mega.nz/folder/YOUR_FOLDER_ID#YOUR_KEY'; // Replace with your MEGA folder link
 
 const getMegaApiUrl = () => {
     // Check if running on localhost
@@ -890,6 +909,31 @@ const fetchMegaVideos = async () => {
 
     if (loadingEl) loadingEl.style.display = 'flex';
     if (galleryEl) galleryEl.innerHTML = '';
+
+    // Check if MEGA folder URL is configured
+    if (MEGA_FOLDER_URL.includes('YOUR_FOLDER_ID') || !MEGA_FOLDER_URL.includes('mega.nz')) {
+        state.megaVideos.loading = false;
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (galleryEl) {
+            galleryEl.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="opacity: 0.5; margin-bottom: 1rem;">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p>MEGA folder URL not configured</p>
+                    <p style="font-size: 0.875rem; opacity: 0.7; margin-top: 0.5rem;">
+                        Please set your MEGA folder URL in app.js (line 866) or set the MEGA_FOLDER_URL environment variable.
+                    </p>
+                    <p style="font-size: 0.75rem; opacity: 0.6; margin-top: 0.5rem;">
+                        Format: https://mega.nz/folder/FOLDER_ID#KEY
+                    </p>
+                </div>
+            `;
+        }
+        return;
+    }
 
     try {
         const response = await fetch(getMegaApiUrl(), {
