@@ -856,8 +856,17 @@ const initStreamPlayer = () => {
 };
 
 // ===== TERABOX PLAYER (DEDICATED) =====
-// Note: This expects the TeraBox URL to resolve to a direct-streamable video.
+// Uses backend resolver to get direct video stream URL
 const TERABOX_VIDEO_URL = 'https://teraboxurl.com/s/1YvMt6-56oPAkYVyZGbe8ZA';
+
+const getTeraboxApiUrl = () => {
+    // Check if running on localhost
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:3000/api/terabox/resolve';
+    }
+    // Use current domain for production (Vercel)
+    return `${window.location.origin}/api/terabox/resolve`;
+};
 
 const initTeraboxPlayer = () => {
     const playBtn = document.getElementById('terabox-play-btn');
@@ -865,40 +874,106 @@ const initTeraboxPlayer = () => {
 
     if (!playBtn || !wrapper) return;
 
-    const loadTeraboxVideo = () => {
+    // Show initial placeholder
+    wrapper.innerHTML = `
+        <div class="player-placeholder">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <p>Click "Play TeraBox Video" to load the video</p>
+        </div>
+    `;
+
+    const resolveAndPlay = async () => {
+        // Show loading state
         wrapper.innerHTML = `
-            <video
-                controls
-                autoplay
-                class="stream-iframe"
-                style="object-fit: contain; background: #000;"
-            >
-                <source src="${TERABOX_VIDEO_URL}">
-                Your browser does not support the video tag.
-            </video>
+            <div class="player-placeholder">
+                <div class="spinner" style="width: 48px; height: 48px; border: 4px solid var(--border-color); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <p>Resolving TeraBox link...</p>
+            </div>
         `;
 
-        const video = wrapper.querySelector('video');
-        if (video) {
-            video.onerror = () => {
-                wrapper.innerHTML = `
-                    <div class="player-placeholder">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1" style="opacity: 0.8;">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                        </svg>
-                        <p style="color: #ef4444; text-align: center;">
-                            Could not play TeraBox video.<br>
-                            Please ensure the link is a direct video URL that can be streamed.
-                        </p>
-                    </div>
-                `;
-            };
+        try {
+            const response = await fetch(getTeraboxApiUrl(), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ shareUrl: TERABOX_VIDEO_URL })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (!data.streamUrl) {
+                throw new Error('No stream URL returned from resolver');
+            }
+
+            // Load video player with resolved URL
+            wrapper.innerHTML = `
+                <video
+                    controls
+                    autoplay
+                    class="stream-iframe"
+                    style="object-fit: contain; background: #000; width: 100%; height: 100%;"
+                    poster="${data.thumbnail || ''}"
+                >
+                    <source src="${data.streamUrl}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            `;
+
+            const video = wrapper.querySelector('video');
+            if (video) {
+                video.onerror = () => {
+                    wrapper.innerHTML = `
+                        <div class="player-placeholder">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1" style="opacity: 0.8;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            <p style="color: #ef4444; text-align: center;">
+                                Could not play video.<br>
+                                The resolved URL may be invalid or expired.
+                            </p>
+                        </div>
+                    `;
+                };
+
+                // Try to play
+                video.play().catch(() => {
+                    // Autoplay blocked - user will need to click play
+                    console.log('Autoplay blocked - user interaction required');
+                });
+            }
+
+        } catch (error) {
+            console.error('TeraBox resolver error:', error);
+            wrapper.innerHTML = `
+                <div class="player-placeholder">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1" style="opacity: 0.8;">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p style="color: #ef4444; text-align: center;">
+                        Failed to resolve TeraBox link.<br>
+                        <small style="opacity: 0.7;">${error.message}</small><br>
+                        <small style="opacity: 0.7; margin-top: 0.5rem; display: block;">
+                            Make sure your resolver service is configured in the backend.
+                        </small>
+                    </p>
+                </div>
+            `;
         }
     };
 
-    playBtn.addEventListener('click', loadTeraboxVideo);
+    playBtn.addEventListener('click', resolveAndPlay);
 };
 
 // ===== INITIALIZATION =====

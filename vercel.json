@@ -1,6 +1,10 @@
 {
     "rewrites": [
         {
+            "source": "/api/terabox/resolve",
+            "destination": "/api/terabox-resolve"
+        },
+        {
             "source": "/api/:path*",
             "destination": "/api/proxy"
         }
