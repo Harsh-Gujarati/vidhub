@@ -855,12 +855,37 @@ const initStreamPlayer = () => {
     });
 };
 
+// ===== TERABOX PLAYER (DEDICATED) =====
+const TERABOX_VIDEO_URL = 'https://teraboxurl.com/s/1YvMt6-56oPAkYVyZGbe8ZA';
+
+const initTeraboxPlayer = () => {
+    const playBtn = document.getElementById('terabox-play-btn');
+    const wrapper = document.getElementById('terabox-player-wrapper');
+
+    if (!playBtn || !wrapper) return;
+
+    const loadTeraboxVideo = () => {
+        wrapper.innerHTML = `
+            <iframe
+                src="${TERABOX_VIDEO_URL}"
+                class="stream-iframe"
+                allow="autoplay; encrypted-media; fullscreen"
+                allowfullscreen
+                data-allowed
+            ></iframe>
+        `;
+    };
+
+    playBtn.addEventListener('click', loadTeraboxVideo);
+};
+
 // ===== INITIALIZATION =====
 const init = () => {
     // Set initial theme
     setTheme(state.theme);
     setupGoogleAuth();
     initStreamPlayer();
+    initTeraboxPlayer();
 
     // Theme toggle
     const themeToggle = document.getElementById('theme-toggle');
