@@ -1123,7 +1123,11 @@ const init = () => {
     const loadMoreVideos = document.getElementById('load-more-videos');
     if (loadMoreVideos) {
         loadMoreVideos.addEventListener('click', () => {
-            fetchVideos(state.videos.cursor);
+            if (state.videos.cursor) {
+                window.fetchVideos(state.videos.cursor);
+            } else {
+                console.warn('No cursor available for loading more videos');
+            }
         });
     }
 
