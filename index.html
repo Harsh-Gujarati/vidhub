@@ -143,6 +143,32 @@
                         </span>
                     </div>
                 </div>
+                <div class="filters-container"
+                    style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                    <div class="filter-group">
+                        <label for="video-sort"
+                            style="color: var(--text-secondary); font-size: 0.875rem; margin-right: 0.5rem;">Sort:</label>
+                        <select id="video-sort" class="filter-select"
+                            style="background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); padding: 0.5rem; border-radius: 0.5rem;">
+                            <option value="Most Reactions" selected>Most Reactions</option>
+                            <option value="Most Collected">Most Collected</option>
+                            <option value="Newest">Newest</option>
+                            <option value="Oldest">Oldest</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="video-period"
+                            style="color: var(--text-secondary); font-size: 0.875rem; margin-right: 0.5rem;">Period:</label>
+                        <select id="video-period" class="filter-select"
+                            style="background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); padding: 0.5rem; border-radius: 0.5rem;">
+                            <option value="AllTime">All Time</option>
+                            <option value="Year">Year</option>
+                            <option value="Month">Month</option>
+                            <option value="Week" selected>Week</option>
+                            <option value="Day">Day</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="ad-container" data-ad-type="in-article" data-ad-id="videos-in-article"
                     data-allow-scripts="true"></div>
                 <div class="loading-spinner" id="videos-loading">
@@ -171,6 +197,32 @@
                             </svg>
                             Most Reactions
                         </span>
+                    </div>
+                </div>
+                <div class="filters-container"
+                    style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                    <div class="filter-group">
+                        <label for="image-sort"
+                            style="color: var(--text-secondary); font-size: 0.875rem; margin-right: 0.5rem;">Sort:</label>
+                        <select id="image-sort" class="filter-select"
+                            style="background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); padding: 0.5rem; border-radius: 0.5rem;">
+                            <option value="Most Reactions" selected>Most Reactions</option>
+                            <option value="Most Collected">Most Collected</option>
+                            <option value="Newest">Newest</option>
+                            <option value="Oldest">Oldest</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="image-period"
+                            style="color: var(--text-secondary); font-size: 0.875rem; margin-right: 0.5rem;">Period:</label>
+                        <select id="image-period" class="filter-select"
+                            style="background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); padding: 0.5rem; border-radius: 0.5rem;">
+                            <option value="AllTime">All Time</option>
+                            <option value="Year">Year</option>
+                            <option value="Month">Month</option>
+                            <option value="Week" selected>Week</option>
+                            <option value="Day">Day</option>
+                        </select>
                     </div>
                 </div>
                 <div class="ad-container" data-ad-type="multiplex" data-ad-id="images-multiplex"
@@ -220,70 +272,76 @@
                             <span class="user-name" id="modal-image-user-name">Unknown</span>
                         </div>
                     </div>
-        </div>
+                </div>
         </div>
 
-            <!-- MEGA VIP Section -->
-            <section id="terabox-section" class="content-section">
-                <div class="section-header">
-                    <h2 class="section-title">MEGA VIP</h2>
-                    <div class="section-stats">
-                        <span class="stat-badge">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        <!-- MEGA VIP Section -->
+        <section id="terabox-section" class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">MEGA VIP</h2>
+                <div class="section-stats">
+                    <span class="stat-badge">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polygon points="12 2 15 10 23 10 17 14 19 22 12 17 5 22 7 14 1 10 9 10 12 2"></polygon>
+                        </svg>
+                        Exclusive Videos
+                    </span>
+                </div>
+            </div>
+
+            <div class="loading-spinner" id="mega-loading">
+                <div class="spinner"></div>
+                <p>Loading MEGA videos...</p>
+            </div>
+            <div class="gallery" id="mega-gallery"></div>
+        </section>
+
+        <!-- Video Modal -->
+        <div id="video-modal" class="modal">
+            <div class="modal-backdrop" onclick="closeVideoModal()"></div>
+            <div class="modal-content">
+                <button class="modal-close" id="close-video-modal" onclick="closeVideoModal()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <video id="modal-video" controls autoplay
+                    style="width: 100%; max-height: 80vh; background: #000;"></video>
+                <div class="modal-info" style="padding: 1.5rem;">
+                    <div class="modal-stats">
+                        <span class="modal-stat">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
-                                <polygon points="12 2 15 10 23 10 17 14 19 22 12 17 5 22 7 14 1 10 9 10 12 2"></polygon>
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                </path>
                             </svg>
-                            Exclusive Videos
+                            <span id="modal-reactions">0</span>
+                        </span>
+                        <span class="modal-stat">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span id="modal-comments">0</span>
+                        </span>
+                        <span class="modal-stat">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span id="modal-collected">0</span>
                         </span>
                     </div>
-                </div>
-
-                <div class="loading-spinner" id="mega-loading">
-                    <div class="spinner"></div>
-                    <p>Loading MEGA videos...</p>
-                </div>
-                <div class="gallery" id="mega-gallery"></div>
-            </section>
-
-            <!-- Video Modal -->
-            <div id="video-modal" class="modal">
-                <div class="modal-backdrop" onclick="closeVideoModal()"></div>
-                <div class="modal-content">
-                    <button class="modal-close" id="close-video-modal" onclick="closeVideoModal()">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                    <video id="modal-video" controls autoplay style="width: 100%; max-height: 80vh; background: #000;"></video>
-                    <div class="modal-info" style="padding: 1.5rem;">
-                        <div class="modal-stats">
-                            <span class="modal-stat">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                </svg>
-                                <span id="modal-reactions">0</span>
-                            </span>
-                            <span class="modal-stat">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                                </svg>
-                                <span id="modal-comments">0</span>
-                            </span>
-                            <span class="modal-stat">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                                </svg>
-                                <span id="modal-collected">0</span>
-                            </span>
-                        </div>
-                        <div class="modal-user">
-                            <div class="user-avatar" id="modal-user-avatar"></div>
-                            <span class="user-name" id="modal-user-name">Unknown</span>
-                        </div>
+                    <div class="modal-user">
+                        <div class="user-avatar" id="modal-user-avatar"></div>
+                        <span class="user-name" id="modal-user-name">Unknown</span>
                     </div>
                 </div>
             </div>
+        </div>
         </div>
 
         <!-- Footer -->
