@@ -3,12 +3,16 @@ const state = {
     videos: {
         items: [],
         cursor: null,
-        loading: false
+        loading: false,
+        sort: 'Most Reactions',
+        period: 'Week'
     },
     images: {
         items: [],
         cursor: null,
-        loading: false
+        loading: false,
+        sort: 'Most Reactions',
+        period: 'Week'
     },
     currentSection: 'videos',
     theme: localStorage.getItem('theme') || 'dark',
@@ -135,9 +139,8 @@ const API = {
     videos: {
         base: 'https://civitai.com/api/trpc/image.getInfinite',
         params: {
-            period: 'Month',
+            // period and sort will be set dynamically from state
             periodMode: 'published',
-            sort: 'Most Reactions',
             types: ['video'],
             withMeta: false,
             useIndex: true,
@@ -152,9 +155,8 @@ const API = {
     images: {
         base: 'https://civitai.com/api/trpc/image.getInfinite',
         params: {
-            period: 'Month',
+            // period and sort will be set dynamically from state
             periodMode: 'published',
-            sort: 'Most Reactions',
             types: ['image'],
             withMeta: false,
             useIndex: true,
@@ -177,7 +179,8 @@ const formatNumber = (num) => {
 };
 
 const getImageUrl = (url, width = 450) => {
-    return `https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/${url}/width=${width}/`;
+    // Add optimization parameters
+    return `https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/${url}/width=${width},optimized=true/`;
 };
 
 const getVideoUrl = (url) => {
@@ -211,18 +214,26 @@ window.fetchVideos = async (cursor = null) => {
         // Deep clone the params to avoid modifying the original
         const params = JSON.parse(JSON.stringify(API.videos.params));
 
+        // Apply dynamic sort and period
+        params.sort = state.videos.sort;
+        params.period = state.videos.period;
+
         // Add cursor (null for first request, or nextCursor for pagination)
-        params.cursor = cursor || null;
+        params.cursor = cursor || undefined;
 
         // Wrap params in the exact format Civitai expects
         const input = {
-            json: params,
-            meta: {
-                values: {
-                    cursor: [cursor ? "defined" : "undefined"]
-                }
-            }
+            json: params
         };
+
+        // Only add meta if cursor is present, otherwise it might cause issues
+        if (cursor) {
+            input.meta = {
+                values: {
+                    cursor: ["defined"]
+                }
+            };
+        }
 
         const apiUrl = `${API.videos.base}?input=${encodeURIComponent(JSON.stringify(input))}`;
         const proxyUrl = `${getProxyUrl()}/?url=${encodeURIComponent(apiUrl)}`;
@@ -296,18 +307,26 @@ window.fetchImages = async (cursor = null) => {
         // Deep clone the params to avoid modifying the original
         const params = JSON.parse(JSON.stringify(API.images.params));
 
+        // Apply dynamic sort and period
+        params.sort = state.images.sort;
+        params.period = state.images.period;
+
         // Add cursor (null for first request, or nextCursor for pagination)
-        params.cursor = cursor || null;
+        params.cursor = cursor || undefined;
 
         // Wrap params in the exact format Civitai expects
         const input = {
-            json: params,
-            meta: {
-                values: {
-                    cursor: [cursor ? "defined" : "undefined"]
-                }
-            }
+            json: params
         };
+
+        // Only add meta if cursor is present
+        if (cursor) {
+            input.meta = {
+                values: {
+                    cursor: ["defined"]
+                }
+            };
+        }
 
         const apiUrl = `${API.images.base}?input=${encodeURIComponent(JSON.stringify(input))}`;
         const proxyUrl = `${getProxyUrl()}/?url=${encodeURIComponent(apiUrl)}`;
@@ -1007,7 +1026,7 @@ const renderMegaVideos = () => {
         const itemJson = JSON.stringify(item).replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
         // Use MEGA stream URL for video source
-        const videoSrc = item.streamUrl?.proxy 
+        const videoSrc = item.streamUrl?.proxy
             ? getMegaStreamUrl(item.megaUrl, item.nodeId)
             : item.streamUrl;
 
@@ -1067,14 +1086,14 @@ window.openMegaVideoModal = (item) => {
 
     if (!modal || !video) return;
 
-    const videoSrc = item.streamUrl?.proxy 
+    const videoSrc = item.streamUrl?.proxy
         ? getMegaStreamUrl(item.megaUrl, item.nodeId)
         : item.streamUrl;
 
     // Set video source and ensure it plays
     video.src = videoSrc;
     video.load(); // Reload the video element
-    
+
     reactions.textContent = '0';
     comments.textContent = '0';
     collected.textContent = '0';
@@ -1134,7 +1153,58 @@ const init = () => {
     const loadMoreImages = document.getElementById('load-more-images');
     if (loadMoreImages) {
         loadMoreImages.addEventListener('click', () => {
-            fetchImages(state.images.cursor);
+            if (state.images.cursor) {
+                fetchImages(state.images.cursor);
+            } else {
+                console.warn('No cursor available for loading more images');
+            }
+        });
+    }
+
+    // Sorting and Period Event Listeners
+    const videoSort = document.getElementById('video-sort');
+    const videoPeriod = document.getElementById('video-period');
+
+    if (videoSort) {
+        videoSort.addEventListener('change', (e) => {
+            state.videos.sort = e.target.value;
+            state.videos.items = [];
+            state.videos.cursor = null;
+            document.getElementById('videos-gallery').innerHTML = '';
+            fetchVideos();
+        });
+    }
+
+    if (videoPeriod) {
+        videoPeriod.addEventListener('change', (e) => {
+            state.videos.period = e.target.value;
+            state.videos.items = [];
+            state.videos.cursor = null;
+            document.getElementById('videos-gallery').innerHTML = '';
+            fetchVideos();
+        });
+    }
+
+    const imageSort = document.getElementById('image-sort');
+    const imagePeriod = document.getElementById('image-period');
+
+    if (imageSort) {
+        imageSort.addEventListener('change', (e) => {
+            state.images.sort = e.target.value;
+            state.images.items = [];
+            state.images.cursor = null;
+            document.getElementById('images-gallery').innerHTML = '';
+            fetchImages();
+        });
+    }
+
+    if (imagePeriod) {
+        imagePeriod.addEventListener('change', (e) => {
+            state.images.period = e.target.value;
+            state.images.items = [];
+            state.images.cursor = null;
+            document.getElementById('images-gallery').innerHTML = '';
+            fetchImages();
         });
     }
 

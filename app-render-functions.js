@@ -28,7 +28,7 @@ const renderVideos = () => {
                 <div class="gallery-item-media" onclick='openVideoModal(${JSON.stringify(item).replace(/'/g, "\\'")})'> 
                     <video 
                         src="${getVideoUrl(item.url)}" 
-                        poster="${getImageUrl(item.url)}"
+                        poster="${getImageUrl(item.url, 250)}"
                         loop
                         muted
                         playsinline
@@ -91,7 +91,7 @@ const renderImages = () => {
         return `
             <div class="gallery-item" data-id="${itemId}" onclick='openImageModal(${JSON.stringify(item).replace(/'/g, "\\'")})'> 
                 <div class="gallery-item-media">
-                    <img src="${getImageUrl(item.url)}" alt="${getItemTitle(item)}" loading="lazy">
+                    <img src="${getImageUrl(item.url, 250)}" alt="${getItemTitle(item)}" loading="lazy">
                     ${isPremium ? '<div class="premium-badge">Premium</div>' : ''}
                 </div>
                 <div class="gallery-item-info">
